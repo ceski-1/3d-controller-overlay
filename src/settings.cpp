@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 #include <filesystem>
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include "settings.h"
 
 char* base_path = SDL_GetBasePath();

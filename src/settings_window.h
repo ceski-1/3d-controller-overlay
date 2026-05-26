@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 #include <vector>
 #include <filesystem>
@@ -65,7 +65,7 @@ std::string get_top_folder(std::string path);
 
 std::string get_first_model();
 
-std::vector<std::string> get_current_mapping(SDL_GameController* sdl_controller);
+std::vector<std::string> get_current_mapping(SDL_Gamepad* sdl_controller);
 
 std::vector<std::string> get_binding(std::string b);
 

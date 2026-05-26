@@ -63,7 +63,7 @@ typedef struct controller_window_struct{
 	GLFWwindow* glfw_window;
 	unsigned ID;
 
-	SDL_GameController* sdl_controller = nullptr;
+	SDL_Gamepad* sdl_controller = nullptr;
 	std::string default_mapping;
 				
 	bool left_click = false;

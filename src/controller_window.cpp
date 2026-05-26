@@ -113,11 +113,11 @@ void createControllerWindow(std::string title, std::string model_path){
 	loadModel(w.model, model_path);
 	w.model_name = get_top_folder(model_path);
 		
-	w.sdl_controller = SDL_GameControllerOpen(0);
+	w.sdl_controller = SDL_OpenGamepad(0);
 	if(w.sdl_controller != NULL){
-		w.default_mapping = SDL_GameControllerMapping(w.sdl_controller);
-		if (SDL_GameControllerHasSensor(w.sdl_controller, SDL_SENSOR_GYRO)){
-			SDL_GameControllerSetSensorEnabled(w.sdl_controller, SDL_SENSOR_GYRO, (SDL_bool)SDL_TRUE);
+		w.default_mapping = SDL_GetGamepadMapping(w.sdl_controller);
+		if (SDL_GamepadHasSensor(w.sdl_controller, SDL_SENSOR_GYRO)){
+			SDL_SetGamepadSensorEnabled(w.sdl_controller, SDL_SENSOR_GYRO, (bool)true);
 		}
 		w.gyro_matrix = glm::mat4(1.0f);
 	}else{
@@ -225,7 +225,7 @@ void controller_window_input(){
 	SDL_PumpEvents();
 	for(unsigned i = 0; i<windows.size(); ++i){
 		//GYROSCOPE
-		//if (SDL_GameControllerHasSensor(windows[i].sdl_controller, SDL_SENSOR_GYRO) && SDL_GameControllerIsSensorEnabled(windows[i].sdl_controller, SDL_SENSOR_GYRO)){
+		//if (SDL_GamepadHasSensor(windows[i].sdl_controller, SDL_SENSOR_GYRO) && SDL_GamepadSensorEnabled(windows[i].sdl_controller, SDL_SENSOR_GYRO)){
 		if (windows[i].gyro_enabled){
 			Uint64 timestamp;
 			int error = SDL_GameControllerGetSensorDataWithTimestamp(windows[i].sdl_controller, SDL_SENSOR_GYRO, &timestamp, windows[i].gyro_data, 3);
@@ -250,8 +250,8 @@ void controller_window_input(){
 					
 					//RESET GYRO BUTTON COMBO
 					if (windows[i].reset_gyro_button1 > -1 && windows[i].reset_gyro_button2 > -1){
-						if(SDL_GameControllerGetButton(windows[i].sdl_controller, (SDL_GameControllerButton)windows[i].reset_gyro_button1) &&
-						   SDL_GameControllerGetButton(windows[i].sdl_controller, (SDL_GameControllerButton)windows[i].reset_gyro_button2)){
+						if(SDL_GetGamepadButton(windows[i].sdl_controller, (SDL_GamepadButton)windows[i].reset_gyro_button1) &&
+						   SDL_GetGamepadButton(windows[i].sdl_controller, (SDL_GamepadButton)windows[i].reset_gyro_button2)){
 							windows[i].gyro_matrix = glm::mat4(1.0f);
 						}
 					}
@@ -259,16 +259,16 @@ void controller_window_input(){
         	}
 		}
 		//ACCELOROMETER
-		if (SDL_GameControllerHasSensor(windows[i].sdl_controller, SDL_SENSOR_ACCEL) && SDL_GameControllerIsSensorEnabled(windows[i].sdl_controller, SDL_SENSOR_ACCEL)){
+		if (SDL_GamepadHasSensor(windows[i].sdl_controller, SDL_SENSOR_ACCEL) && SDL_GamepadSensorEnabled(windows[i].sdl_controller, SDL_SENSOR_ACCEL)){
 			//std::cout << "controller has accelerometer." << std::endl;
 		}
 		//LEFT STICK
-		windows[i].model.meshes[5].stick_X = SDL_GameControllerGetAxis(windows[i].sdl_controller, SDL_CONTROLLER_AXIS_LEFTX);
-		windows[i].model.meshes[5].stick_Y = SDL_GameControllerGetAxis(windows[i].sdl_controller, SDL_CONTROLLER_AXIS_LEFTY);
-		windows[i].model.meshes[7].stick_X = SDL_GameControllerGetAxis(windows[i].sdl_controller, SDL_CONTROLLER_AXIS_LEFTX);
-		windows[i].model.meshes[7].stick_Y = SDL_GameControllerGetAxis(windows[i].sdl_controller, SDL_CONTROLLER_AXIS_LEFTY);
-		windows[i].model.meshes[16].stick_X = SDL_GameControllerGetAxis(windows[i].sdl_controller, SDL_CONTROLLER_AXIS_LEFTX);
-		windows[i].model.meshes[16].stick_Y = SDL_GameControllerGetAxis(windows[i].sdl_controller, SDL_CONTROLLER_AXIS_LEFTY);
+		windows[i].model.meshes[5].stick_X = SDL_GetGamepadAxis(windows[i].sdl_controller, SDL_GAMEPAD_AXIS_LEFTX);
+		windows[i].model.meshes[5].stick_Y = SDL_GetGamepadAxis(windows[i].sdl_controller, SDL_GAMEPAD_AXIS_LEFTY);
+		windows[i].model.meshes[7].stick_X = SDL_GetGamepadAxis(windows[i].sdl_controller, SDL_GAMEPAD_AXIS_LEFTX);
+		windows[i].model.meshes[7].stick_Y = SDL_GetGamepadAxis(windows[i].sdl_controller, SDL_GAMEPAD_AXIS_LEFTY);
+		windows[i].model.meshes[16].stick_X = SDL_GetGamepadAxis(windows[i].sdl_controller, SDL_GAMEPAD_AXIS_LEFTX);
+		windows[i].model.meshes[16].stick_Y = SDL_GetGamepadAxis(windows[i].sdl_controller, SDL_GAMEPAD_AXIS_LEFTY);
 		if (abs(windows[i].model.meshes[7].stick_X / 32767) > windows[i].model.meshes[7].ring_highlight_deadzone * 0.01 || 
 			abs(windows[i].model.meshes[7].stick_Y / 32767) > windows[i].model.meshes[7].ring_highlight_deadzone * 0.01){
 			windows[i].model.meshes[7].highlight_value = std::max(abs(windows[i].model.meshes[7].stick_X / 32767), abs(windows[i].model.meshes[7].stick_Y / 32767)) * 1.2f;
@@ -276,12 +276,12 @@ void controller_window_input(){
 			windows[i].model.meshes[7].highlight_value = 0.0f;
 		}
 		//RIGHT STICK
-		windows[i].model.meshes[6].stick_X = SDL_GameControllerGetAxis(windows[i].sdl_controller, SDL_CONTROLLER_AXIS_RIGHTX);
-		windows[i].model.meshes[6].stick_Y = SDL_GameControllerGetAxis(windows[i].sdl_controller, SDL_CONTROLLER_AXIS_RIGHTY);
-		windows[i].model.meshes[8].stick_X = SDL_GameControllerGetAxis(windows[i].sdl_controller, SDL_CONTROLLER_AXIS_RIGHTX);
-		windows[i].model.meshes[8].stick_Y = SDL_GameControllerGetAxis(windows[i].sdl_controller, SDL_CONTROLLER_AXIS_RIGHTY);
-		windows[i].model.meshes[17].stick_X = SDL_GameControllerGetAxis(windows[i].sdl_controller, SDL_CONTROLLER_AXIS_RIGHTX);
-		windows[i].model.meshes[17].stick_Y = SDL_GameControllerGetAxis(windows[i].sdl_controller, SDL_CONTROLLER_AXIS_RIGHTY);
+		windows[i].model.meshes[6].stick_X = SDL_GetGamepadAxis(windows[i].sdl_controller, SDL_GAMEPAD_AXIS_RIGHTX);
+		windows[i].model.meshes[6].stick_Y = SDL_GetGamepadAxis(windows[i].sdl_controller, SDL_GAMEPAD_AXIS_RIGHTY);
+		windows[i].model.meshes[8].stick_X = SDL_GetGamepadAxis(windows[i].sdl_controller, SDL_GAMEPAD_AXIS_RIGHTX);
+		windows[i].model.meshes[8].stick_Y = SDL_GetGamepadAxis(windows[i].sdl_controller, SDL_GAMEPAD_AXIS_RIGHTY);
+		windows[i].model.meshes[17].stick_X = SDL_GetGamepadAxis(windows[i].sdl_controller, SDL_GAMEPAD_AXIS_RIGHTX);
+		windows[i].model.meshes[17].stick_Y = SDL_GetGamepadAxis(windows[i].sdl_controller, SDL_GAMEPAD_AXIS_RIGHTY);
 		if (abs(windows[i].model.meshes[8].stick_X / 32767) > windows[i].model.meshes[8].ring_highlight_deadzone * 0.01 || 
 			abs(windows[i].model.meshes[8].stick_Y / 32767) > windows[i].model.meshes[8].ring_highlight_deadzone * 0.01){
 			windows[i].model.meshes[8].highlight_value = std::max(abs(windows[i].model.meshes[8].stick_X / 32767), abs(windows[i].model.meshes[8].stick_Y / 32767)) * 1.2f;
@@ -289,16 +289,16 @@ void controller_window_input(){
 			windows[i].model.meshes[8].highlight_value = 0.0f;
 		}
 		//LEFT TRIGGER
-		windows[i].model.meshes[3].pull = SDL_GameControllerGetAxis(windows[i].sdl_controller, SDL_CONTROLLER_AXIS_TRIGGERLEFT);
+		windows[i].model.meshes[3].pull = SDL_GetGamepadAxis(windows[i].sdl_controller, SDL_GAMEPAD_AXIS_LEFT_TRIGGER);
 		windows[i].model.meshes[3].highlight_value = windows[i].model.meshes[3].pull / 32767;
 		windows[i].model.meshes[3].press = windows[i].model.meshes[3].highlight_value;
 		//RIGHT TRIGGER
-		windows[i].model.meshes[4].pull = SDL_GameControllerGetAxis(windows[i].sdl_controller, SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
+		windows[i].model.meshes[4].pull = SDL_GetGamepadAxis(windows[i].sdl_controller, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER);
 		windows[i].model.meshes[4].highlight_value = windows[i].model.meshes[4].pull / 32767;
 		windows[i].model.meshes[4].press = windows[i].model.meshes[4].highlight_value;
 		//BUTTONS
 		for (int b=0; b<21; b++){
-			if(SDL_GameControllerGetButton(windows[i].sdl_controller, (SDL_GameControllerButton)b)){
+			if(SDL_GetGamepadButton(windows[i].sdl_controller, (SDL_GamepadButton)b)){
 				windows[i].model.meshes[9 + b].press = 1.0f;
 				windows[i].model.meshes[9 + b].highlight_value = 1.0f;
 			}else{
@@ -307,9 +307,9 @@ void controller_window_input(){
 			}
 		}
 		//TOUCH POINTS
-		int touch_pads = SDL_GameControllerGetNumTouchpads(windows[i].sdl_controller);
+		int touch_pads = SDL_GetNumGamepadTouchpads(windows[i].sdl_controller);
 		if(touch_pads > 0){
-			SDL_GameControllerGetTouchpadFinger(windows[i].sdl_controller, 
+			SDL_GetGamepadTouchpadFinger(windows[i].sdl_controller, 
 												0, 
 												0, 
 												&windows[i].model.meshes[30].touch_state, 
@@ -327,7 +327,7 @@ void controller_window_input(){
 				windows[i].model.meshes[30].highlight_value = 0;
 				windows[i].model.meshes[30].visible = false;
 			}
-			SDL_GameControllerGetTouchpadFinger(windows[i].sdl_controller, 
+			SDL_GetGamepadTouchpadFinger(windows[i].sdl_controller, 
 												0, 
 												1, 
 												&windows[i].model.meshes[31].touch_state, 
@@ -454,22 +454,22 @@ void controller_window_input(){
 }
 
 void controller_sdl_events(SDL_Event* event){
-	if(event->type == SDL_CONTROLLERDEVICEADDED){
+	if(event->type == SDL_EVENT_GAMEPAD_ADDED){
 		std::cout << "game controller added." << std::endl;
 		
 		int game_controllers = 0;
 		for (int i = 0; i < SDL_NumJoysticks(); i++){
-			if (SDL_IsGameController(i)){
+			if (SDL_IsGamepad(i)){
 				game_controllers++;
 			}
 		}
 		if(game_controllers == 1){
 			for(unsigned i=0; i<windows.size(); ++i){
-				windows[i].sdl_controller = SDL_GameControllerOpen(0);
+				windows[i].sdl_controller = SDL_OpenGamepad(0);
 				if(windows[i].sdl_controller != NULL){
-					windows[i].default_mapping = SDL_GameControllerMapping(windows[i].sdl_controller);
-					if (SDL_GameControllerHasSensor(windows[i].sdl_controller, SDL_SENSOR_GYRO)){
-						SDL_GameControllerSetSensorEnabled(windows[i].sdl_controller, SDL_SENSOR_GYRO, (SDL_bool)SDL_TRUE);
+					windows[i].default_mapping = SDL_GetGamepadMapping(windows[i].sdl_controller);
+					if (SDL_GamepadHasSensor(windows[i].sdl_controller, SDL_SENSOR_GYRO)){
+						SDL_SetGamepadSensorEnabled(windows[i].sdl_controller, SDL_SENSOR_GYRO, (bool)true);
 					}
 				}else{
 					std::cout << "couldn't open sdl controller" << std::endl;

@@ -502,21 +502,21 @@ void drawSettingsWindow(){
 		if (ImGui::CollapsingHeader("Controller")){
 			std::vector<int> devices;
             for (int i = 0; i < SDL_NumJoysticks(); i++){
-                if (SDL_IsGameController(i)){
+                if (SDL_IsGamepad(i)){
                     devices.push_back(i);
 				}
             }
 			std::string device_name = "";
 			if(current_window->sdl_controller != nullptr)
-				device_name = SDL_GameControllerName(current_window->sdl_controller);
+				device_name = SDL_GetGamepadName(current_window->sdl_controller);
 			if (ImGui::BeginCombo("Controllers", device_name.c_str(), 0)){
                 for (size_t i = 0; i < devices.size(); i++){
                     if (ImGui::Selectable(SDL_GameControllerNameForIndex(devices[i]))){
-						SDL_GameControllerAddMapping(current_window->default_mapping.c_str());
-                        current_window->sdl_controller = SDL_GameControllerOpen(i);
+						SDL_AddGamepadMapping(current_window->default_mapping.c_str());
+                        current_window->sdl_controller = SDL_OpenGamepad(i);
 						if(current_window->sdl_controller != NULL){
-							SDL_GameControllerSetSensorEnabled(current_window->sdl_controller, SDL_SENSOR_GYRO, (SDL_bool)current_window->gyro_enabled);
-							current_window->default_mapping = SDL_GameControllerMapping(current_window->sdl_controller);
+							SDL_SetGamepadSensorEnabled(current_window->sdl_controller, SDL_SENSOR_GYRO, (bool)current_window->gyro_enabled);
+							current_window->default_mapping = SDL_GetGamepadMapping(current_window->sdl_controller);
 						}else{
 							std::cout << "couldn't open sdl controller " << i << std::endl;
 							std::cout << SDL_GetError() << std::endl;
@@ -903,7 +903,7 @@ void drawSettingsWindow(){
 			}
 		}
 		if (ImGui::CollapsingHeader("Gyro")){
-			if (SDL_GameControllerHasSensor(current_window->sdl_controller, SDL_SENSOR_GYRO)){
+			if (SDL_GamepadHasSensor(current_window->sdl_controller, SDL_SENSOR_GYRO)){
 				if (ImGui::Checkbox("Enable Gyro", &current_window->gyro_enabled)){
 					if (current_window->gyro_enabled){
 						current_window->gyro_toggled = true;
@@ -917,7 +917,7 @@ void drawSettingsWindow(){
 				ImGui::Text("Reset Gyro button combo");
 				std::string button1_name = "";
 				if(current_window->reset_gyro_button1 > -1){
-					//button1_name = SDL_GameControllerGetStringForButton((SDL_GameControllerButton)current_window->reset_gyro_button1);
+					//button1_name = SDL_GetGamepadStringForButton((SDL_GamepadButton)current_window->reset_gyro_button1);
 					button1_name = input_names[current_window->reset_gyro_button1].c_str();
 				}else{
 					button1_name = "none";
@@ -925,7 +925,7 @@ void drawSettingsWindow(){
 				if (ImGui::BeginCombo("Button 1", button1_name.c_str(), 0)){
 					for (unsigned i = 0; i < 22; i++){
 						if (i>0){
-							//if (ImGui::Selectable(SDL_GameControllerGetStringForButton((SDL_GameControllerButton)(i-1)))){
+							//if (ImGui::Selectable(SDL_GetGamepadStringForButton((SDL_GamepadButton)(i-1)))){
 							if (ImGui::Selectable(input_names[i-1].c_str())){
 								current_window->reset_gyro_button1 = i-1;
 							}
@@ -939,7 +939,7 @@ void drawSettingsWindow(){
 				}
 				std::string button2_name = "";
 				if(current_window->reset_gyro_button2 > -1){
-					//button2_name = SDL_GameControllerGetStringForButton((SDL_GameControllerButton)current_window->reset_gyro_button2);
+					//button2_name = SDL_GetGamepadStringForButton((SDL_GamepadButton)current_window->reset_gyro_button2);
 					button2_name = input_names[current_window->reset_gyro_button2].c_str();
 				}else{
 					button2_name = "none";
@@ -947,7 +947,7 @@ void drawSettingsWindow(){
 				if (ImGui::BeginCombo("Button 2", button2_name.c_str(), 0)){
 					for (unsigned i = 0; i < 22; i++){
 						if (i>0){
-							//if (ImGui::Selectable(SDL_GameControllerGetStringForButton((SDL_GameControllerButton)(i-1)))){
+							//if (ImGui::Selectable(SDL_GetGamepadStringForButton((SDL_GamepadButton)(i-1)))){
 							if (ImGui::Selectable(input_names[i-1].c_str())){
 								current_window->reset_gyro_button2 = i-1;
 							}
@@ -1255,14 +1255,14 @@ void drawSettingsWindow(){
 							current_mapping[current_input] = binding_names[i];
 						}
 
-						SDL_Joystick* joystick = SDL_GameControllerGetJoystick(getControllerWindow(tabs[selected_tab].ID)->sdl_controller);
-						SDL_JoystickGUID guid = SDL_JoystickGetGUID(joystick);
+						SDL_Joystick* joystick = SDL_GetGamepadJoystick(getControllerWindow(tabs[selected_tab].ID)->sdl_controller);
+						SDL_GUID guid = SDL_GetJoystickGUID(joystick);
 						char guid_string[100] = {};
 						SDL_JoystickGetGUIDString(guid, guid_string, 100);
 						////std::cout << "GUID for controller is : " << guid_string << std::endl;
 						std::string new_mapping = guid_string;
 						new_mapping.append(",");
-						new_mapping.append(SDL_GameControllerName(current_window->sdl_controller));
+						new_mapping.append(SDL_GetGamepadName(current_window->sdl_controller));
 						new_mapping.append(",");
 						//new_mapping.append(",controller,");
 						for(int i = 0; i < 27; i++){
@@ -1274,7 +1274,7 @@ void drawSettingsWindow(){
 							}
 						}
 						std::cout << new_mapping << std::endl;
-						SDL_GameControllerAddMapping(new_mapping.c_str());
+						SDL_AddGamepadMapping(new_mapping.c_str());
 					}
 				}
 				ImGui::EndCombo();
@@ -1295,7 +1295,7 @@ void drawSettingsWindow(){
 						std::filesystem::create_directory(path);
                         path.append(name);
 						open_ofstream(path);
-						//char* mapping = SDL_GameControllerMapping(getControllerWindow(tabs[selected_tab].ID)->sdl_controller);
+						//char* mapping = SDL_GetGamepadMapping(getControllerWindow(tabs[selected_tab].ID)->sdl_controller);
 						std::string mapping = "";
 						for(int i = 0; i < 27; i++){
 							if (current_mapping[i] != ""){
@@ -1345,18 +1345,18 @@ void drawSettingsWindow(){
 								std::vector<std::string> mapping;
 								read_file(&mapping);
 								std::cout << "mapping file : " << mapping[0] << std::endl;
-								SDL_Joystick* joystick = SDL_GameControllerGetJoystick(getControllerWindow(tabs[selected_tab].ID)->sdl_controller);
-								SDL_JoystickGUID guid = SDL_JoystickGetGUID(joystick);
+								SDL_Joystick* joystick = SDL_GetGamepadJoystick(getControllerWindow(tabs[selected_tab].ID)->sdl_controller);
+								SDL_GUID guid = SDL_GetJoystickGUID(joystick);
 								char guid_string[100] = {};
 								SDL_JoystickGetGUIDString(guid, guid_string, 100);
 								//std::cout << "GUID for controller is : " << guid_string << std::endl;
 								std::string mapping_string = guid_string;
 								mapping_string.append(",");
-								mapping_string.append(SDL_GameControllerName(current_window->sdl_controller));
+								mapping_string.append(SDL_GetGamepadName(current_window->sdl_controller));
 								mapping_string.append(",");
 								mapping_string.append(mapping[0]);
 								std::cout << "mapping_string : " << mapping_string << std::endl;
-								SDL_GameControllerAddMapping(mapping_string.c_str());
+								SDL_AddGamepadMapping(mapping_string.c_str());
 								close_ifstream();
 								ImGui::CloseCurrentPopup();
 							}
@@ -1368,7 +1368,7 @@ void drawSettingsWindow(){
             }
 			ImGui::SameLine();
 			if (ImGui::Button("Default")){
-                SDL_GameControllerAddMapping(current_window->default_mapping.c_str());
+                SDL_AddGamepadMapping(current_window->default_mapping.c_str());
 			}
 		}
 		if (ImGui::CollapsingHeader("Help")){
@@ -1770,7 +1770,7 @@ void loadTabs(){
 			//Motion Settings
 			if (line == "gyro enabled"){
 				getControllerWindow(tabs.back().ID)->gyro_enabled = std::stoi(lines[line_index + 1]);
-				SDL_GameControllerSetSensorEnabled(getControllerWindow(tabs.back().ID)->sdl_controller, SDL_SENSOR_GYRO, (SDL_bool)getControllerWindow(tabs.back().ID)->gyro_enabled);
+				SDL_SetGamepadSensorEnabled(getControllerWindow(tabs.back().ID)->sdl_controller, SDL_SENSOR_GYRO, (bool)getControllerWindow(tabs.back().ID)->gyro_enabled);
 			}
 			if (line == "reset gyro button 1")
 				getControllerWindow(tabs.back().ID)->reset_gyro_button1 = std::stoi(lines[line_index + 1]);
@@ -1904,10 +1904,10 @@ std::vector<std::string> get_binding(std::string b){
 	return binding;
 }
 
-std::vector<std::string> get_current_mapping(SDL_GameController* sdl_controller){
+std::vector<std::string> get_current_mapping(SDL_Gamepad* sdl_controller){
 	std::vector<std::string> mapping;
-	if(SDL_GameControllerMapping(sdl_controller)){
-		char* current_mapping = SDL_GameControllerMapping(sdl_controller);
+	if(SDL_GetGamepadMapping(sdl_controller)){
+		char* current_mapping = SDL_GetGamepadMapping(sdl_controller);
 		//std::cout << current_mapping << std::endl;
 		std::stringstream line_stream(current_mapping);
 		std::string word;

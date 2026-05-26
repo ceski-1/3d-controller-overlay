@@ -12,7 +12,7 @@
 bool gQuit = false;
 
 void InitializeProgram(){
-	if(SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER) < 0){
+	if(SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_GAMEPAD) < 0){
         printf("Error: %s\n", SDL_GetError());
         exit(1);
     }
