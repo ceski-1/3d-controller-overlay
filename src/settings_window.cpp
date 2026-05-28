@@ -1911,23 +1911,19 @@ std::vector<std::string> get_binding(std::string b){
 std::vector<std::string> get_current_mapping(SDL_Gamepad* sdl_controller){
 	std::vector<std::string> mapping;
 	char *gamepad_mapping = SDL_GetGamepadMapping(sdl_controller);
-	const bool empty_mapping = (gamepad_mapping == NULL);
-	if (empty_mapping) {
-		gamepad_mapping = "";
-	}
-	std::stringstream line_stream(gamepad_mapping);
-	std::string word;
-	while (std::getline(line_stream, word, ',')){
-		mapping.push_back(word);
-	}
-	if (!empty_mapping) {
+	if (gamepad_mapping != NULL) {
+		std::stringstream line_stream(gamepad_mapping);
+		std::string word;
+		while (std::getline(line_stream, word, ',')){
+			mapping.push_back(word);
+		}
 		SDL_free(gamepad_mapping);
-	}
-	if (!mapping.empty()) {
-		mapping.pop_back();
-	}
-	if (!mapping.empty()) {
-		mapping.pop_back();
+		if (!mapping.empty()) {
+			mapping.pop_back();
+		}
+		if (!mapping.empty()) {
+			mapping.pop_back();
+		}
 	}
 	return mapping;
 }
@@ -1961,5 +1957,5 @@ void OsOpenInShell(const char* path){
 
 	char command[256];
 	snprintf(command, 256, "%s \"%s\"", open_executable.c_str(), path);
-	system(command);
+	[[maybe_unused]] int result = system(command);
 }
