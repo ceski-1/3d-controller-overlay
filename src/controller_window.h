@@ -5,8 +5,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "stb_image.h"
-
 #include <math.h>
 #include <iostream>
 #include <vector>
@@ -63,7 +61,8 @@ typedef struct controller_window_struct{
 	GLFWwindow* glfw_window;
 	unsigned ID;
 
-	SDL_Gamepad* sdl_controller = nullptr;
+	SDL_JoystickID sdl_id = 0;
+	SDL_Gamepad* sdl_controller = NULL;
 	std::string default_mapping;
 				
 	bool left_click = false;
@@ -109,6 +108,7 @@ typedef struct controller_window_struct{
 	bool gyro_enabled = false;
 	float gyro_data[3] = {0.0f, 0.0f, 0.0f};
 	Uint64 gyro_time = 0;
+	Uint64 last_gyro_time = 0;
 	int reset_gyro_button1 = -1;
 	int reset_gyro_button2 = -1;
 	int gyro_correction = 5;
@@ -156,8 +156,6 @@ controller_window* getLastWindow();
 controller_window* getControllerWindow(unsigned ID);
 
 void controller_window_input();
-
-void controller_sdl_events(SDL_Event* event);
 
 void removeControllerWindow(unsigned ID);
 

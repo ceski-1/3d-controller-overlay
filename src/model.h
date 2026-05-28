@@ -77,7 +77,7 @@ typedef struct mesh_struct {
     
     float stick_X = 0.0f;
     float stick_Y = 0.0f;
-    Uint8 touch_state = 0;
+    bool touch_state = false;
     float touch_X = 0.0f;
     float touch_Y = 0.0f;
     float pull = 0.0f;

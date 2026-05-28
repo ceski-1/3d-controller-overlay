@@ -1,18 +1,14 @@
-#if defined(__linux__) 
-#elif __FreeBSD__
-#elif __ANDROID__
-#elif __APPLE__
-#elif _WIN32
-#define SDL_MAIN_HANDLED
-#else //some other operating system
-#endif
-
+#include <SDL3/SDL_main.h>
 #include "settings_window.h"
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4100)
+#endif
 
 bool gQuit = false;
 
 void InitializeProgram(){
-	if(SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_GAMEPAD) < 0){
+	if(!SDL_Init(SDL_INIT_GAMEPAD)) {
         printf("Error: %s\n", SDL_GetError());
         exit(1);
     }
@@ -27,12 +23,6 @@ void Input(){
 	
 	settings_window_input(gQuit);
 	controller_window_input();
-	
-	SDL_Event event;
-	while (SDL_PollEvent(&event)){
-    	settings_sdl_events(&event);	
-		controller_sdl_events(&event);
-	}
 }
 
 void Draw(){
@@ -60,7 +50,7 @@ void Cleanup(){
 	glfwTerminate();
 }
 
-int main(){
+int main(int argc, char *argv[]) {
 	InitializeProgram();
 	
 	MainLoop();

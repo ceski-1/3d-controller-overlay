@@ -1,5 +1,5 @@
-#ifndef STRINGS_H
-#define STRINGS_H
+#ifndef STRINGS_3DCO_H
+#define STRINGS_3DCO_H
 
 #include <string>
 

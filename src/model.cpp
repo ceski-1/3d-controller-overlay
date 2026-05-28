@@ -1,4 +1,5 @@
 #include "model.h"
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 std::string model_filenames[32] = {
@@ -38,7 +39,7 @@ std::string model_filenames[32] = {
 
 void loadModel(Model &m, std::string path){
     m.path = path;
-    for(int i=m.meshes.size(); i>0; i--){
+    for (size_t i = m.meshes.size(); i > 0; i--) {
         m.meshes.pop_back();
     }
     for(int i=0; i<32; i++){
@@ -121,13 +122,13 @@ void loadMesh(Mesh &m, std::string path){
 
         if(words.size() > 3 && words[0] == "f"){
             //std::cout << "line describes a Face." << std::endl;
-            for(unsigned long i = 1; i < words.size() - 2; i++){
-                int num_verts = vertices.size();
+            for(unsigned long i = 1; i < (unsigned long)(words.size() - 2); i++) {
+                int num_verts = (int)vertices.size();
                 indices.push_back(num_verts);
                 indices.push_back(num_verts + i);
                 indices.push_back(num_verts + i + 1);
             }
-            for(unsigned long i = 1; i<words.size(); i++){
+            for(unsigned long i = 1; i < (unsigned long)words.size(); i++) {
                 std::vector<int> ind;
                 std::string value;
                 std::stringstream word_stream(words[i]);
@@ -146,8 +147,9 @@ void loadMesh(Mesh &m, std::string path){
             }
         }
 	}
-    
-    GLfloat vertex_data[vertices.size() * 8];
+
+    const size_t vertex_data_size = sizeof(GLfloat) * vertices.size() * 8;
+    GLfloat *vertex_data = (GLfloat *)SDL_malloc(vertex_data_size);
     for(unsigned long i = 0; i<vertices.size(); i++){
         vertex_data[0 + (8 * i)] = positions[vertices[i].position].x;
         vertex_data[1 + (8 * i)] = positions[vertices[i].position].y;
@@ -159,8 +161,9 @@ void loadMesh(Mesh &m, std::string path){
         vertex_data[7 + (8 * i)] = texcoords[vertices[i].texcoord].y;
     }
     
-    m.elements = indices.size();
-    GLuint index_data[m.elements];
+    m.elements = (GLuint)indices.size();
+    const size_t index_data_size = sizeof(GLuint) * m.elements;
+    GLuint *index_data = (GLuint *)SDL_malloc(index_data_size);
     for(unsigned long i = 0; i<m.elements; i++){
         index_data[i] = indices[i];
     }
@@ -171,7 +174,7 @@ void loadMesh(Mesh &m, std::string path){
 
 	glBindBuffer(GL_ARRAY_BUFFER, m.vbo);
 	glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(vertex_data),
+                 vertex_data_size,
                  vertex_data,
                  GL_STATIC_DRAW);
     //vertex attribute
@@ -186,9 +189,12 @@ void loadMesh(Mesh &m, std::string path){
 
     glGenBuffers(1, &m.ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m.ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index_data), index_data, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_data_size, index_data, GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
+
+	SDL_free(vertex_data);
+	SDL_free(index_data);
 }
 
 void readInfo(Model &m, std::string path){
@@ -281,10 +287,8 @@ void loadTexture(GLuint &id, std::string path){
     int width, height, nrChannels;
     unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
     
-    GLenum format;
-    if (nrChannels == 1)
-        format = GL_RED;
-    else if (nrChannels == 3)
+    GLenum format = GL_RED; // nrChannels == 1
+    if (nrChannels == 3)
         format = GL_RGB;
     else if (nrChannels == 4)
 		format = GL_RGBA;
@@ -301,19 +305,19 @@ void loadTexture(GLuint &id, std::string path){
 void drawMesh(Mesh m, glm::mat4 motion, GLuint shader){
     glBindVertexArray(m.vao);
 		
-	shaderUniformInt(shader, "num_textures", m.textures.size());
+	shaderUniformInt(shader, "num_textures", (int)m.textures.size());
 	for(size_t i=0; i<m.textures.size(); i++){
         std::string name = "textures[";
 		name.append(std::to_string(i));
 		name.append("]");
-	    shaderUniformInt(shader, std::string(name).append(".id").c_str(), i);
+	    shaderUniformInt(shader, std::string(name).append(".id").c_str(), (int)i);
         shaderUniformInt(shader, std::string(name).append(".type").c_str(), m.textures[i].type);
         shaderUniformFloat(shader, std::string(name).append(".offsetX").c_str(), m.textures[i].offsetX);
         shaderUniformFloat(shader, std::string(name).append(".offsetY").c_str(), m.textures[i].offsetY);
         shaderUniformFloat(shader, std::string(name).append(".scaleX").c_str(), m.textures[i].scaleX);
         shaderUniformFloat(shader, std::string(name).append(".scaleY").c_str(), m.textures[i].scaleY);
         shaderUniformFloat(shader, std::string(name).append(".rotation").c_str(), m.textures[i].rotation);
-        glActiveTexture(GL_TEXTURE0 + i);
+        glActiveTexture((GLenum)(GL_TEXTURE0 + i));
 	    glBindTexture(GL_TEXTURE_2D, m.textures[i].id);
     }
     
@@ -344,7 +348,7 @@ void drawMesh(Mesh m, glm::mat4 motion, GLuint shader){
         model = glm::rotate(model, m.pull / -32767 * m.trigger_max, glm::vec3(1.0f, 0.0f, 0.0f));
     }
     //TOUCH POINTS
-    if(m.touch_state > 0){
+    if(m.touch_state){
         model = glm::translate(model, glm::vec3((m.touch_X * m.touch_width) - m.touch_width * 0.5, 0, (m.touch_Y * m.touch_height) - m.touch_height * 0.5));
     }
     

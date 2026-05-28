@@ -18,9 +18,9 @@ GLuint CompileShader(GLuint type, const char* shaderSource){
     glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &result);
 
     if(result == GL_FALSE){
-        int length;
+        int length = 0;
         glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &length);
-        char errorMessages[length];
+        char *errorMessages = (char *)SDL_calloc(length, sizeof(*errorMessages));
         glGetShaderInfoLog(shaderObject, length, &length, errorMessages);
 
         if(type == GL_VERTEX_SHADER){
@@ -28,6 +28,7 @@ GLuint CompileShader(GLuint type, const char* shaderSource){
         }else if(type == GL_FRAGMENT_SHADER){
             printf("ERROR: GL_FRAGMENT_SHADER compilation failed!\n%s", errorMessages);
         }
+        SDL_free(errorMessages);
 
         glDeleteShader(shaderObject);
 
@@ -51,12 +52,13 @@ GLuint CreateShaderProgram(const char* vertexShaderSource, const char* fragmentS
     glGetProgramiv(programObject, GL_LINK_STATUS, &result);
 
     if(result == GL_FALSE){
-        int length;
+        int length = 0;
         glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &length);
-        char errorMessages[length];
+        char *errorMessages = (char *)SDL_calloc(length, sizeof(*errorMessages));
         glGetProgramInfoLog(programObject, length, &length, errorMessages);
 
         printf("ERROR: Shader Program linking failed! : %s\n", errorMessages);
+        SDL_free(errorMessages);
     }
     
     //glValidateProgram(programObject);
@@ -70,7 +72,7 @@ GLuint CreateShaderProgram(const char* vertexShaderSource, const char* fragmentS
 }
 
 std::string GetShaderSource(std::string path){
-    char* base_path = SDL_GetBasePath();
+    const char *base_path = SDL_GetBasePath();
     std::filesystem::path file_path;
     file_path = std::filesystem::path(base_path);
 	std::filesystem::path sub_path(path);

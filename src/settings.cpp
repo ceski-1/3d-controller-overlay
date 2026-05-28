@@ -7,7 +7,7 @@
 #include <SDL3/SDL.h>
 #include "settings.h"
 
-char* base_path = SDL_GetBasePath();
+const char *base_path = SDL_GetBasePath();
 std::filesystem::path file_path;
 std::ofstream ofs;
 std::ifstream ifs;	

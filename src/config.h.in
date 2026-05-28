@@ -1,0 +1,1 @@
+#cmakedefine PROJECT_STRING "@PROJECT_STRING@"

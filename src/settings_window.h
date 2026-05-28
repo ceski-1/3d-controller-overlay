@@ -3,7 +3,6 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
 
 #include <SDL3/SDL.h>
 
@@ -20,7 +19,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include "imfilebrowser.h"
+#include "imgui-filebrowser/imfilebrowser.h"
 
 typedef struct controller_window_struct controller_window;
 
@@ -46,8 +45,6 @@ void removeSettingsWindow();
 void drawSettingsWindow();
 
 void settings_window_input(bool &quit);
-
-void settings_sdl_events(SDL_Event* event);
 
 void settings_framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
