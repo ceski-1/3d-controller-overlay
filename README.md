@@ -2,32 +2,51 @@
 
 3D Controller Overlay is a simple program for content creaters to show what their controller is doing in 3D space without the need for a handcam.
 
-How to Compile:
-- Download and extract this repository or clone it using git.
+[![screenshot](res/screenshot.png)](https://github.com/ceski-1/3d-controller-overlay/releases/latest)
 
-Windows:
-- If you want to compile using my batch file you need to have command line access to the gcc/g++ compiler. I use MinGW, you can download it from https://winlibs.com/ extract it somewhere then add the path to the bin folder inside mingw32 (eg. C:\mingw32\bin) to your PATH in Environment Variables. 
-- Run windows_build.bat
+## Download
 
-Linux: (Debian based, Ubuntu, Mint, etc.) 
-- If you want to use my build script you will need bear (it just updates the compile_commands.json each time it builds)\
-    sudo apt-get install bear\
-    Or, you can just take bear out of the build script.
+Windows and Linux binaries are provided on the [Releases](https://github.com/ceski-1/3d-controller-overlay/releases/latest) page. To build from source, see [Compiling](#compiling).
 
-- You will need to install glfw3 and sdl2 (unless you get libraries and link them yourself)\
-    sudo apt-get install libsdl2-dev glfw3
+## Compiling
 
-- chmod +x linux_build.sh
+Requirements:
 
-- ./linux_build
+- [CMake](https://cmake.org) (3.16 or later)
+- [glad](https://github.com/Dav1dde/glad/tree/v0.1.36) (0.1.36, gl 3.3, core profile)
+- [GLFW](https://github.com/glfw/glfw) (3.4 or later)
+- [glm](https://github.com/g-truc/glm) (1.0.3 or later)
+- [imgui](https://github.com/ocornut/imgui) (1.92.8 or later)
+- [imgui-filebrowser](https://github.com/AirGuanZ/imgui-filebrowser) (latest)
+- [SDL3](https://github.com/libsdl-org/SDL) (latest)
+- [stb](https://github.com/nothings/stb) (stb_image.h 2.30 or later)
 
-Linux: (Arch based, Manjaro, SteamOS, etc.)
-- All the same things for ubuntu but using Pacman or some package installer like yay or yum. Hopefully if you're using arch based linux you already kinda know what you're doing.
+For Windows, [vcpkg](https://github.com/microsoft/vcpkg) is recommended. For Linux, use the libraries provided by your distribution.
 
-Mac:
-- I got this built and running on an Intel based mac without too much headache. I believe I needed brew and maybe a couple other things but it wans't too bad. I don't have access to a mac atm but when I get one again I'll update these instructions.
-- Haven't tried any apple silicon macs but if I get my hands on one I'll try it out and update the instructions.
+Clone the repository:
 
-Enjoy!
+```
+git clone https://github.com/ceski-1/3d-controller-overlay.git
+```
 
-Larf
+Configure (if using vcpkg):
+
+```
+cmake -B build -DCMAKE_TOOLCHAIN_FILE="<path_to_vcpkg>/scripts/buildsystems/vcpkg.cmake"
+```
+
+Configure (if not using vcpkg):
+
+```
+cmake -B build
+```
+
+Build:
+
+```
+cmake --build build --config Release
+```
+
+## License
+
+3D Controller Overlay is licensed under the MIT License, see [LICENSE](https://github.com/ceski-1/3d-controller-overlay/blob/main/LICENSE) for more information.
