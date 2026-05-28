@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=3D Controller Overlay
+Exec=3dco %F
+TryExec=3dco
+Type=Application
+Icon=3dco
+Categories=Utility

@@ -1,0 +1,118 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/vcpkg_cache,readwrite"
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.runs-on }}
+    defaults:
+      run:
+        shell: ${{ matrix.config.shell }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: Linux
+            runs-on: ubuntu-latest
+            shell: bash
+            generator: Ninja
+            triplet: x64-linux-release
+            artifact: build/*.AppImage
+            vcpkg_root: $VCPKG_INSTALLATION_ROOT
+            options: -DCMAKE_INSTALL_PREFIX=/usr
+
+          - name: Windows
+            runs-on: windows-2025-vs2026
+            shell: pwsh
+            generator: Visual Studio 18 2026
+            triplet: x64-windows-static-release
+            artifact: build/*.zip
+            vcpkg_root: ${env:VCPKG_INSTALLATION_ROOT}
+            options: -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+
+    steps:
+      - name: Configure Developer Command Prompt (Windows)
+        if: runner.os == 'Windows'
+        uses: TheMrMilchmann/setup-msvc-dev@v4
+        with:
+          arch: x64
+
+      - name: Install Dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential autoconf autoconf-archive automake libltdl-dev libtool libudev-dev ninja-build libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
+
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Restore Cache
+        id: cache-vcpkg
+        uses: actions/cache/restore@v5
+        with:
+          path: ${{ github.workspace }}/vcpkg_cache
+          key: vcpkg-${{ matrix.config.triplet }}
+
+      - name: Configure
+        run: >-
+          cmake -B build
+          -G "${{ matrix.config.generator }}"
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_TOOLCHAIN_FILE="${{ matrix.config.vcpkg_root }}/scripts/buildsystems/vcpkg.cmake"
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.config.triplet }}
+          ${{ matrix.config.options }}
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Package
+        run: |
+          cd build
+          cpack
+
+      - name: Upload
+        if: matrix.config.artifact
+        uses: actions/upload-artifact@v7
+        with:
+          path: ${{ matrix.config.artifact }}
+          archive: false
+
+      - name: Get Release Version
+        if: contains(github.ref, 'tags')
+        shell: bash
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Release
+        if: contains(github.ref, 'tags')
+        uses: ncipollo/release-action@v1
+        with:
+          name: 3dco ${{ env.RELEASE_VERSION }}
+          bodyFile: .github/changelog.md
+          allowUpdates: true
+          artifacts: ${{ matrix.config.artifact }}
+
+      - name: Delete Old Cache
+        continue-on-error: true
+        if: steps.cache-vcpkg.outputs.cache-hit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh cache delete --repo ${{ github.repository }} ${{ steps.cache-vcpkg.outputs.cache-primary-key }}
+
+      - name: Save Cache
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ github.workspace }}/vcpkg_cache
+          key: ${{ steps.cache-vcpkg.outputs.cache-primary-key }}
