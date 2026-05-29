@@ -1,0 +1,5 @@
+Title: Steam Controller 3D model
+Copyright: © 2026 Valve Corporation
+License: CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+Source: https://gitlab.steamos.cloud/SteamHardware/SteamController
+Changes: These files have been modified to reduce their polygon count.
