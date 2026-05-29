@@ -1,6 +1,4 @@
-# Blender 4.1.0
-# www.blender.org
-o Options_Button
+o start_button
 v 0.394662 0.204682 -0.359870
 v 0.420740 0.204682 -0.359858
 v 0.394674 0.204682 -0.385949

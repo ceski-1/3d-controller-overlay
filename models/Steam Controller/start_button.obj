@@ -1,7 +1,4 @@
-# This file uses centimeters as units for non-parametric coordinates.
-
-mtllib start_button.mtl
-g default
+o start_button
 v 0.367177 0.293343 -0.667940
 v 0.367119 0.290418 -0.711547
 v 0.324669 0.294150 -0.667939
@@ -207,8 +204,6 @@ vn 0.933685 -0.011777 -0.357902
 vn 0.497875 0.005498 -0.867231
 vn 0.158687 0.007182 -0.987303
 s 1
-g start_button group1
-usemtl initialShadingGroup
 f 4/1/1 8/2/2 7/3/3 2/4/4
 f 8/5/2 4/6/1 5/7/5 9/8/6
 f 8/2/2 3/9/7 1/10/8 7/3/3

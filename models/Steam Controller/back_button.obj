@@ -1,7 +1,4 @@
-# This file uses centimeters as units for non-parametric coordinates.
-
-mtllib back_button.mtl
-g default
+o back_button
 v -0.367177 0.293343 -0.667935
 v -0.367120 0.290418 -0.711543
 v -0.324668 0.294150 -0.667934
@@ -207,8 +204,6 @@ vn -0.933673 -0.012052 -0.357924
 vn -0.158684 0.007237 -0.987303
 vn -0.497983 0.005421 -0.867170
 s 1
-g back_button group1
-usemtl initialShadingGroup
 f 4/1/1 2/2/2 7/3/3 8/4/4
 f 8/5/4 9/6/5 5/7/6 4/8/1
 f 8/4/4 7/3/3 1/9/7 3/10/8

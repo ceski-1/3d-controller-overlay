@@ -1,6 +1,4 @@
-# Blender 4.1.0
-# www.blender.org
-o Start_Button
+o start_button
 v 0.000000 0.209143 -0.258877
 v 0.000000 0.233335 -0.258877
 v 0.014877 0.209143 -0.255917

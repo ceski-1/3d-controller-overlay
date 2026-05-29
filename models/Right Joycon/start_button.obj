@@ -1,6 +1,4 @@
-# Blender 4.1.0
-# www.blender.org
-o plus_button
+o start_button
 v -0.101209 0.101265 -0.575815
 v -0.102817 0.098550 -0.575815
 v -0.079362 0.098550 -0.575815

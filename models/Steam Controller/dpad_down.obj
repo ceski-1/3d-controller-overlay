@@ -1,7 +1,4 @@
-# This file uses centimeters as units for non-parametric coordinates.
-
-mtllib dpad_down.mtl
-g default
+o dpad_down
 v -0.635851 0.257901 -0.389124
 v -0.636581 0.296612 -0.403755
 v -0.636400 0.286404 -0.501014
@@ -127,8 +124,6 @@ vn -0.319183 0.945095 -0.070119
 vn 0.121354 0.981306 0.149374
 vn 0.141845 0.987235 -0.072438
 s 1
-g dpad_down group1
-usemtl initialShadingGroup
 f 20/1/1 21/2/2 12/3/3 1/4/4
 f 32/5/5 33/6/6 28/7/7 16/8/8
 f 37/9/9 38/10/10 14/11/11 23/12/12

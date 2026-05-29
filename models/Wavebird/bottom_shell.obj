@@ -1,6 +1,4 @@
-# Blender 4.1.0
-# www.blender.org
-o Bottom_Shell
+o bottom_shell
 v 0.000000 0.061409 -0.695394
 v 0.000000 -0.057155 -0.686133
 v 0.000000 -0.143643 -0.677251

@@ -1,6 +1,4 @@
-# Blender 4.1.0
-# www.blender.org
-o minus_button
+o back_button
 v 0.042575 0.100216 -0.545933
 v 0.042575 0.097503 -0.544320
 v 0.042575 0.097463 -0.567791

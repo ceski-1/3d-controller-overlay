@@ -1,6 +1,4 @@
-# Blender 4.1.0
-# www.blender.org
-o right_button
+o dpad_right
 v -0.403924 0.188780 0.004141
 v -0.403924 0.214678 0.004097
 v -0.384468 0.188787 0.008011

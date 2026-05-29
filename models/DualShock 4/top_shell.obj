@@ -1,7 +1,4 @@
-# Blender 4.1.0
-# www.blender.org
-mtllib top_shell.mtl
-o Top_Shell
+o top_shell
 v 0.640912 0.183283 -0.431320
 v 0.640899 0.210747 -0.403293
 v 0.693878 0.177810 -0.428814

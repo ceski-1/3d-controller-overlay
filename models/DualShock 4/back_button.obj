@@ -1,6 +1,4 @@
-# Blender 4.1.0
-# www.blender.org
-o Start_Button
+o back_button
 v -0.394326 0.204682 -0.360236
 v -0.420404 0.204682 -0.360249
 v -0.394313 0.204682 -0.386315

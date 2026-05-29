@@ -1,6 +1,4 @@
-# Blender 4.1.0
-# www.blender.org
-o Left_Trigger
+o left_trigger
 v -0.082277 -0.009121 -0.065422
 v -0.115485 -0.011344 -0.052348
 v -0.082969 0.018712 -0.050125

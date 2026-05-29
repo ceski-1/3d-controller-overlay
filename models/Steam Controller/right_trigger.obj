@@ -1,7 +1,4 @@
-# This file uses centimeters as units for non-parametric coordinates.
-
-mtllib right_trigger.mtl
-g default
+o right_trigger
 v 0.617128 -0.274560 -0.768515
 v 0.619357 -0.239775 -0.732834
 v 0.619377 -0.219293 -0.713072
@@ -529,8 +526,6 @@ vn -0.104986 0.994459 -0.005421
 vn -0.169937 0.985438 -0.005818
 vn -0.482610 0.875804 -0.007422
 s 1
-g right_trigger
-usemtl sc_solid_stl_20260447SG
 f 19//1 1//2 2//3 18//4
 f 20//5 21//6 111//7 110//8
 f 21//6 59//9 112//10 111//7

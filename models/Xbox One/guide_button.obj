@@ -1,6 +1,4 @@
-# Blender 4.1.0
-# www.blender.org
-o Home_Button
+o guide_button
 v -0.000000 0.266726 -0.553746
 v -0.000000 0.310637 -0.556626
 v 0.031157 0.267132 -0.547562

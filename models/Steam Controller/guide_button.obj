@@ -1,7 +1,4 @@
-# This file uses centimeters as units for non-parametric coordinates.
-
-mtllib guide_button.mtl
-g default
+o guide_button
 v -0.043688 0.295911 -0.496591
 v 0.000497 0.295364 -0.478977
 v 0.000000 0.298988 -0.542702
@@ -249,8 +246,6 @@ vn 0.917806 0.018412 -0.396601
 vn 0.999719 0.020361 -0.012155
 vn 0.928434 0.025806 0.370600
 s 1
-g guide_button group1
-usemtl initialShadingGroup
 f 1/1/1 9/11/2 14/9/3 12/15/4
 f 9/11/2 2/2/5 10/12/6 14/9/3
 f 14/9/3 10/12/6 3/3/7 11/13/8
