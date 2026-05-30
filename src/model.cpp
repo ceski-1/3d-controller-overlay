@@ -2,61 +2,33 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-std::string model_filenames[32] = {
-    "top_shell.obj",
-    "bottom_shell.obj",
-    "extra.obj",
-    "left_trigger.obj",
-    "right_trigger.obj",
-    "left_stick.obj",
-    "right_stick.obj",
-    "left_ring.obj",
-    "right_ring.obj",
-    "a_button.obj",
-    "b_button.obj",
-    "x_button.obj",
-    "y_button.obj",
-    "back_button.obj",
-    "guide_button.obj",
-    "start_button.obj",
-    "left_cap.obj",
-    "right_cap.obj",
-    "left_bumper.obj",
-    "right_bumper.obj",
-    "dpad_up.obj",
-    "dpad_down.obj",
-    "dpad_left.obj",
-    "dpad_right.obj",
-    "misc.obj",
-    "paddle1.obj",
-    "paddle2.obj",
-    "paddle3.obj",
-    "paddle4.obj",
-    "touchpad.obj",
-    "touch_point1.obj",
-    "touch_point2.obj"
-};
-
 void loadModel(Model &m, std::string path){
     m.path = path;
     for (size_t i = m.meshes.size(); i > 0; i--) {
         m.meshes.pop_back();
     }
-    for(int i=0; i<32; i++){
+    for (size_t i = 0; i < SDL_arraysize(mesh_filenames); i++) {
         Mesh new_mesh;
-        if(i==0){ //TOP SHELL
-            new_mesh.material.color[0] = 0.8f;
-            new_mesh.material.color[1] = 0.8f;
-            new_mesh.material.color[2] = 0.8f;
-            new_mesh.material.specular = 0.2f;
-        }
-        if(i>6 && i<11){ //RINGS AND CAPS
-            new_mesh.material.specular = 0.05f;
-            new_mesh.material.shininess = 10.0f;
+        switch ((mesh_idx)i) {
+            case mesh_idx::top_shell:
+                new_mesh.material.color[0] = 0.8f;
+                new_mesh.material.color[1] = 0.8f;
+                new_mesh.material.color[2] = 0.8f;
+                new_mesh.material.specular = 0.2f;
+                break;
+            case mesh_idx::left_stick_ring:
+            case mesh_idx::right_stick_ring:
+            case mesh_idx::left_stick_cap:
+            case mesh_idx::right_stick_cap:
+                new_mesh.material.specular = 0.05f;
+                new_mesh.material.shininess = 10.0f;
+                break;
+            default:
+                break;
         }
         std::string file_path = path;
         file_path.append("/");
-        file_path.append(model_filenames[i]);
+        file_path.append(mesh_filenames[i]);
         loadMesh(new_mesh, file_path);
         m.meshes.push_back(new_mesh);
     }
@@ -205,8 +177,8 @@ void readInfo(Model &m, std::string path){
         while (info_file){
             std::string line;
             std::getline(info_file, line);
-            for(int i=0; i<32; i++){ 
-                if(line == model_filenames[i]){ 
+            for (size_t i = 0; i < SDL_arraysize(mesh_filenames); i++) {
+                if (line == mesh_filenames[i]) {
                     for(int p=0; p<3; p++){ 
                         std::getline(info_file, line);
                         if(isFloat(line))
@@ -239,6 +211,9 @@ void readInfo(Model &m, std::string path){
                     std::getline(info_file, line);
                     if(isFloat(line))
                         m.meshes[i].touch_height = std::stof(line);
+                    for (int unused = 0; unused < 2; unused++) {
+                        std::getline(info_file, line);
+                    }
                 }
             }
         }
@@ -249,8 +224,8 @@ void writeInfo(Model &m, std::string path){
     std::string file_path = path;
     file_path.append("/info.txt");
     std::ofstream info_file = std::ofstream(file_path);
-    for(int i = 0; i<32; i++){ 
-        info_file << model_filenames[i].c_str() << "\n";
+    for (int i = 0; i < SDL_arraysize(mesh_filenames); i++) {
+        info_file << mesh_filenames[i].c_str() << "\n";
         for(int pos=0; pos<3; pos++){ 
             info_file << m.meshes[i].position[pos] << "\n";
         }
@@ -267,6 +242,8 @@ void writeInfo(Model &m, std::string path){
         info_file << m.meshes[i].stick_max << "\n";
         info_file << m.meshes[i].touch_width << "\n";
         info_file << m.meshes[i].touch_height << "\n";
+        info_file << m.meshes[i].unused1 << "\n";
+        info_file << m.meshes[i].unused2 << "\n";
     }
 }
 
@@ -363,18 +340,16 @@ void drawMesh(Mesh m, glm::mat4 motion, GLuint shader){
     }	
 }
 
-void drawModel(Model m, GLuint shader){
-    for(Mesh mesh : m.meshes){
-        m.meshes[18].popup = m.popup_bumpers;
-        m.meshes[19].popup = m.popup_bumpers;
-        m.meshes[3].popup = m.popup_triggers;
-        m.meshes[4].popup = m.popup_triggers;
-        m.meshes[25].popup = m.popup_paddles;
-        m.meshes[26].popup = m.popup_paddles;
-        m.meshes[27].popup = m.popup_paddles;
-        m.meshes[28].popup = m.popup_paddles;
+void drawModel(Model m, GLuint shader) {
+    for (Mesh mesh : m.meshes) {
+        m.meshes[(int)mesh_idx::left_shoulder].popup = m.popup_bumpers;
+        m.meshes[(int)mesh_idx::right_shoulder].popup = m.popup_bumpers;
+        m.meshes[(int)mesh_idx::left_trigger].popup = m.popup_triggers;
+        m.meshes[(int)mesh_idx::right_trigger].popup = m.popup_triggers;
+        m.meshes[(int)mesh_idx::paddle1].popup = m.popup_paddles;
+        m.meshes[(int)mesh_idx::paddle2].popup = m.popup_paddles;
+        m.meshes[(int)mesh_idx::paddle3].popup = m.popup_paddles;
+        m.meshes[(int)mesh_idx::paddle4].popup = m.popup_paddles;
         drawMesh(mesh, m.motion_matrix, shader);
     }
 }
-
-

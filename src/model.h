@@ -14,6 +14,91 @@
 
 #include "shader.h"
 
+enum class mesh_idx {
+    top_shell,
+    bottom_shell,
+    extra,
+    left_trigger,
+    right_trigger,
+    left_stick_base,
+    right_stick_base,
+    left_stick_ring,
+    right_stick_ring,
+    south_button,
+    east_button,
+    west_button,
+    north_button,
+    back_button,
+    guide_button,
+    start_button,
+    left_stick_cap,
+    right_stick_cap,
+    left_shoulder,
+    right_shoulder,
+    dpad_up,
+    dpad_down,
+    dpad_left,
+    dpad_right,
+    misc1,
+    paddle1,
+    paddle2,
+    paddle3,
+    paddle4,
+    touchpad, // Left trackpad
+    misc2,    // Right trackpad
+    misc3,
+    misc4,
+    misc5,
+    misc6,
+    touch_point1,
+    touch_point2,
+    left_gripsense,
+    right_gripsense,
+    num_mesh
+};
+
+static std::string mesh_filenames[] = {
+    "top_shell.obj",
+    "bottom_shell.obj",
+    "extra.obj",
+    "left_trigger.obj",
+    "right_trigger.obj",
+    "left_stick_base.obj",
+    "right_stick_base.obj",
+    "left_stick_ring.obj",
+    "right_stick_ring.obj",
+    "south_button.obj",
+    "east_button.obj",
+    "west_button.obj",
+    "north_button.obj",
+    "back_button.obj",
+    "guide_button.obj",
+    "start_button.obj",
+    "left_stick_cap.obj",
+    "right_stick_cap.obj",
+    "left_shoulder.obj",
+    "right_shoulder.obj",
+    "dpad_up.obj",
+    "dpad_down.obj",
+    "dpad_left.obj",
+    "dpad_right.obj",
+    "misc1.obj",
+    "paddle1.obj",
+    "paddle2.obj",
+    "paddle3.obj",
+    "paddle4.obj",
+    "touchpad.obj",
+    "misc2.obj",
+    "misc3.obj",
+    "misc4.obj",
+    "misc5.obj",
+    "misc6.obj",
+    "touch_point1.obj",
+    "touch_point2.obj",
+    "left_gripsense.obj",
+    "right_gripsense.obj",
+};
+
 typedef struct pos_struct{
     GLfloat x = 0;
     GLfloat y = 0;
@@ -74,6 +159,8 @@ typedef struct mesh_struct {
     float stick_max = 0.0f;
     float touch_width = 0.0f;
     float touch_height = 0.0f;
+    float unused1 = 0.0f;
+    float unused2 = 0.0f;
     
     float stick_X = 0.0f;
     float stick_Y = 0.0f;

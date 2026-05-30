@@ -8,30 +8,6 @@
 #pragma warning(disable: 4100)
 #endif
 
-std::string button_names[21] = {
-    "south button",
-    "east button",
-    "west button",
-    "north button",
-    "back button",
-    "guide button",
-    "start button",
-    "left cap",
-    "right cap",
-    "left bumper",
-    "right bumper",
-    "d-pad up",
-    "d-pad down",
-    "d-pad left",
-    "d-pad right",
-    "misc",
-    "paddle 1",
-    "paddle 2",
-    "paddle 3",
-    "paddle 4",
-    "touchpad"
-};
-
 float grid_vertices[] = {
     -1.0f,  0.0f,  0.0f,  
      1.0f,  0.0f,  0.0f,
@@ -50,6 +26,44 @@ unsigned int defaultWidth = 640;
 unsigned int defaultHeight = 480;
 
 std::vector<controller_window> windows;
+
+void clearTouchpads(controller_window &w) {
+	w.num_touchpads = 0;
+	w.num_fingers[0] = 0;
+	w.num_fingers[1] = 0;
+
+	Mesh *tpoint_meshes[] = {
+		&w.model.meshes[(int)mesh_idx::touch_point1],
+		&w.model.meshes[(int)mesh_idx::touch_point2],
+	};
+
+	for (size_t i = 0; i < SDL_arraysize(tpoint_meshes); i++) {
+		tpoint_meshes[i]->touch_state = false;
+		tpoint_meshes[i]->visible = false;
+	}
+}
+
+void configureTouchpads(controller_window &w) {
+	bool has_touchpads = false;
+	w.num_touchpads = SDL_GetNumGamepadTouchpads(w.sdl_controller);
+	w.num_touchpads = SDL_clamp(w.num_touchpads, 0, 2);
+	if (w.num_touchpads > 0) {
+		// Two configurations supported:
+		// 1. One touchpad, up to two fingers simultaneously.
+		// 2. Two trackpads, only one finger per trackpad.
+		const int max_fingers = (w.num_touchpads == 1 ? 2 : 1);
+		for (int i = 0; i < w.num_touchpads; i++) {
+			w.num_fingers[i] = SDL_GetNumGamepadTouchpadFingers(w.sdl_controller, i);
+			w.num_fingers[i] = SDL_clamp(w.num_fingers[i], 0, max_fingers);
+			if (w.num_fingers[i] > 0) {
+				has_touchpads = true;
+			}
+		}
+	}
+	if (!has_touchpads) {
+		clearTouchpads(w);
+	}
+}
 
 void createControllerWindow(std::string title, std::string model_path){
     controller_window w;
@@ -119,11 +133,13 @@ void createControllerWindow(std::string title, std::string model_path){
 
 	w.sdl_controller = NULL;
 	w.sdl_id = 0;
+	clearTouchpads(w);
 	SDL_JoystickID *ids = SDL_GetGamepads(NULL);
 	if (ids) {
 		w.sdl_controller = SDL_OpenGamepad(ids[0]);
 		if (w.sdl_controller != NULL) {
 			w.sdl_id = ids[0];
+			configureTouchpads(w);
 		}
 		SDL_free(ids);
 	}
@@ -283,11 +299,13 @@ static void updateGyroState(controller_window &w) {
 	}
 
 	// Reset gyro button combo
-	if (w.sdl_controller != NULL
-	    && w.reset_gyro_button1 > -1 && w.reset_gyro_button2 > -1
-	    && SDL_GetGamepadButton(w.sdl_controller, (SDL_GamepadButton)w.reset_gyro_button1)
-	    && SDL_GetGamepadButton(w.sdl_controller, (SDL_GamepadButton)w.reset_gyro_button2)) {
-		w.gyro_matrix = glm::mat4(1.0f);
+	if (w.sdl_controller != NULL) {
+		if (w.reset_gyro_button1 > (int)input_idx::none && w.reset_gyro_button1 < (int)input_idx::num_input
+		    && w.reset_gyro_button2 > (int)input_idx::none && w.reset_gyro_button2 < (int)input_idx::num_input
+		    && SDL_GetGamepadButton(w.sdl_controller, (SDL_GamepadButton)(w.reset_gyro_button1))
+		    && SDL_GetGamepadButton(w.sdl_controller, (SDL_GamepadButton)(w.reset_gyro_button2))) {
+			w.gyro_matrix = glm::mat4(1.0f);
+		}
 	}
 }
 
@@ -295,124 +313,137 @@ static Sint16 getGamepadAxisValue(controller_window &w, SDL_GamepadAxis sdl_axis
 	return (w.sdl_controller != NULL ? SDL_GetGamepadAxis(w.sdl_controller, sdl_axis) : 0);
 }
 
-static void updateStickState(controller_window &w) {
-	// Left stick
-	const float left_stick_X = getGamepadAxisValue(w, SDL_GAMEPAD_AXIS_LEFTX);
-	const float left_stick_Y = getGamepadAxisValue(w, SDL_GAMEPAD_AXIS_LEFTY);
-	w.model.meshes[5].stick_X = left_stick_X;
-	w.model.meshes[5].stick_Y = left_stick_Y;
-	w.model.meshes[7].stick_X = left_stick_X;
-	w.model.meshes[7].stick_Y = left_stick_Y;
-	w.model.meshes[16].stick_X = left_stick_X;
-	w.model.meshes[16].stick_Y = left_stick_Y;
-	if (abs(w.model.meshes[7].stick_X / 32767) > w.model.meshes[7].ring_highlight_deadzone * 0.01 ||
-		abs(w.model.meshes[7].stick_Y / 32767) > w.model.meshes[7].ring_highlight_deadzone * 0.01) {
-		w.model.meshes[7].highlight_value = std::max(abs(w.model.meshes[7].stick_X / 32767), abs(w.model.meshes[7].stick_Y / 32767)) * 1.2f;
-	} else {
-		w.model.meshes[7].highlight_value = 0.0f;
-	}
+static void updateStickValues(controller_window &w, SDL_GamepadAxis x_axis, SDL_GamepadAxis y_axis,
+                              mesh_idx base, mesh_idx ring, mesh_idx cap) {
+	const float x_value = (float)getGamepadAxisValue(w, x_axis);
+	const float y_value = (float)getGamepadAxisValue(w, y_axis);
+	w.model.meshes[(int)base].stick_X = x_value;
+	w.model.meshes[(int)base].stick_Y = y_value;
+	w.model.meshes[(int)ring].stick_X = x_value;
+	w.model.meshes[(int)ring].stick_Y = y_value;
+	w.model.meshes[(int)cap].stick_X = x_value;
+	w.model.meshes[(int)cap].stick_Y = y_value;
 
-	// Right stick
-	const float right_stick_X = getGamepadAxisValue(w, SDL_GAMEPAD_AXIS_RIGHTX);
-	const float right_stick_Y = getGamepadAxisValue(w, SDL_GAMEPAD_AXIS_RIGHTY);
-	w.model.meshes[6].stick_X = right_stick_X;
-	w.model.meshes[6].stick_Y = right_stick_Y;
-	w.model.meshes[8].stick_X = right_stick_X;
-	w.model.meshes[8].stick_Y = right_stick_Y;
-	w.model.meshes[17].stick_X = right_stick_X;
-	w.model.meshes[17].stick_Y = right_stick_Y;
-	if (abs(w.model.meshes[8].stick_X / 32767) > w.model.meshes[8].ring_highlight_deadzone * 0.01 ||
-		abs(w.model.meshes[8].stick_Y / 32767) > w.model.meshes[8].ring_highlight_deadzone * 0.01) {
-		w.model.meshes[8].highlight_value = std::max(abs(w.model.meshes[8].stick_X / 32767), abs(w.model.meshes[8].stick_Y / 32767)) * 1.2f;
+	Mesh &ring_mesh = w.model.meshes[(int)ring];
+	const float ring_x = abs(ring_mesh.stick_X / 32767.0f);
+	const float ring_y = abs(ring_mesh.stick_Y / 32767.0f);
+	if (ring_x > ring_mesh.ring_highlight_deadzone * 0.01f ||
+		ring_y > ring_mesh.ring_highlight_deadzone * 0.01f) {
+		ring_mesh.highlight_value = std::max(ring_x, ring_y) * 1.2f;
 	} else {
-		w.model.meshes[8].highlight_value = 0.0f;
+		ring_mesh.highlight_value = 0.0f;
 	}
+}
+
+static void updateStickState(controller_window &w) {
+	updateStickValues(w, SDL_GAMEPAD_AXIS_LEFTX, SDL_GAMEPAD_AXIS_LEFTY,
+	                  mesh_idx::left_stick_base, mesh_idx::left_stick_ring,
+	                  mesh_idx::left_stick_cap);
+
+	updateStickValues(w, SDL_GAMEPAD_AXIS_RIGHTX, SDL_GAMEPAD_AXIS_RIGHTY,
+	                  mesh_idx::right_stick_base, mesh_idx::right_stick_ring,
+	                  mesh_idx::right_stick_cap);
+}
+
+static void updateTriggerValues(controller_window &w, SDL_GamepadAxis trigger_axis, mesh_idx trigger) {
+	Mesh &trigger_mesh = w.model.meshes[(int)trigger];
+	trigger_mesh.pull = (float)getGamepadAxisValue(w, trigger_axis);
+	trigger_mesh.highlight_value = trigger_mesh.pull / 32767.0f;
+	trigger_mesh.press = trigger_mesh.highlight_value;
 }
 
 static void updateTriggerState(controller_window &w) {
-	// Left trigger
-	w.model.meshes[3].pull = getGamepadAxisValue(w, SDL_GAMEPAD_AXIS_LEFT_TRIGGER);
-	w.model.meshes[3].highlight_value = w.model.meshes[3].pull / 32767;
-	w.model.meshes[3].press = w.model.meshes[3].highlight_value;
-
-	// Right trigger
-	w.model.meshes[4].pull = getGamepadAxisValue(w, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER);
-	w.model.meshes[4].highlight_value = w.model.meshes[4].pull / 32767;
-	w.model.meshes[4].press = w.model.meshes[4].highlight_value;
+	updateTriggerValues(w, SDL_GAMEPAD_AXIS_LEFT_TRIGGER, mesh_idx::left_trigger);
+	updateTriggerValues(w, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER, mesh_idx::right_trigger);
 }
 
 static void updateButtonState(controller_window &w) {
-	for (int b = 0; b < 21; b++) {
-		if (w.sdl_controller != NULL && SDL_GetGamepadButton(w.sdl_controller, (SDL_GamepadButton)b)) {
-			w.model.meshes[9 + b].press = 1.0f;
-			w.model.meshes[9 + b].highlight_value = 1.0f;
+	const int b_start = (int)mesh_idx::south_button;
+	for (int b = b_start; b < (int)mesh_idx::num_mesh; b++) {
+		Mesh &button_mesh = w.model.meshes[b];
+		if (w.sdl_controller != NULL && SDL_GetGamepadButton(w.sdl_controller, (SDL_GamepadButton)(b - b_start))) {
+			button_mesh.press = 1.0f;
+			button_mesh.highlight_value = 1.0f;
 		} else {
-			w.model.meshes[9 + b].press = 0.0f;
-			w.model.meshes[9 + b].highlight_value = 0.0f;
+			button_mesh.press = 0.0f;
+			button_mesh.highlight_value = 0.0f;
 		}
 	}
 }
 
-// TODO: Extend this to support more than DS/DS4
-static void updateTouchpadState(controller_window &w) {
-	if (w.sdl_controller == NULL) {
-		// First finger
-		w.model.meshes[30].touch_state = false;
-		w.model.meshes[30].touch_X = 0.5f;
-		w.model.meshes[30].touch_Y = 0.5f;
-		w.model.meshes[30].highlight_value = 0.0f;
-		w.model.meshes[30].visible = false;
-
-		// Second finger
-		w.model.meshes[31].touch_state = false;
-		w.model.meshes[31].touch_X = 0.5f;
-		w.model.meshes[31].touch_Y = 0.5f;
-		w.model.meshes[31].highlight_value = 0.0f;
-		w.model.meshes[31].visible = false;
+static void updateTouchPointState(controller_window &w) {
+	if (w.num_touchpads < 1) {
 		return;
 	}
 
-	const int touch_pads = SDL_GetNumGamepadTouchpads(w.sdl_controller);
-	if (touch_pads > 0) {
-		// First finger
-		SDL_GetGamepadTouchpadFinger(w.sdl_controller,
-		                             0,
-		                             0,
-		                             &w.model.meshes[30].touch_state,
-		                             &w.model.meshes[30].touch_X,
-		                             &w.model.meshes[30].touch_Y,
-		                             nullptr);
-		if (w.model.meshes[30].touch_state) {
-			if (w.model.meshes[29].press) {
-				w.model.meshes[30].highlight_value = 0;
-			} else {
-				w.model.meshes[30].highlight_value = 1;
-			}
-			w.model.meshes[30].visible = true;
-		} else {
-			w.model.meshes[30].highlight_value = 0;
-			w.model.meshes[30].visible = false;
-		}
+	Mesh *tpoint_meshes[] = {
+		&w.model.meshes[(int)mesh_idx::touch_point1],
+		&w.model.meshes[(int)mesh_idx::touch_point2],
+	};
 
-		// Second finger
-		SDL_GetGamepadTouchpadFinger(w.sdl_controller,
-		                             0,
-		                             1,
-		                             &w.model.meshes[31].touch_state,
-		                             &w.model.meshes[31].touch_X,
-		                             &w.model.meshes[31].touch_Y,
-		                             nullptr);
-		if (w.model.meshes[31].touch_state) {
-			if (w.model.meshes[29].press) {
-				w.model.meshes[31].highlight_value = 0;
-			} else {
-				w.model.meshes[31].highlight_value = 1;
-			}
-			w.model.meshes[31].visible = true;
-		} else {
-			w.model.meshes[31].highlight_value = 0;
-			w.model.meshes[31].visible = false;
+	if (w.sdl_controller == NULL) {
+		for (size_t i = 0; i < SDL_arraysize(tpoint_meshes); i++) {
+			tpoint_meshes[i]->touch_state = false;
+			tpoint_meshes[i]->visible = false;
 		}
+		return;
+	}
+
+	const bool touchpad_press[] = {
+		w.model.meshes[(int)mesh_idx::touchpad].press > 0.0f,
+		w.model.meshes[(int)mesh_idx::misc2].press > 0.0f,
+	};
+
+	int tpoint_idx = 0;
+	for (int touchpad_idx = 0; touchpad_idx < w.num_touchpads; touchpad_idx++) {
+		for (int finger_idx = 0; finger_idx < w.num_fingers[touchpad_idx]; finger_idx++) {
+			Mesh *tpoint_mesh = tpoint_meshes[tpoint_idx];
+			float pressure = 0.0f;
+			SDL_GetGamepadTouchpadFinger(w.sdl_controller,
+			                             touchpad_idx,
+			                             finger_idx,
+			                             &tpoint_mesh->touch_state,
+			                             &tpoint_mesh->touch_X,
+			                             &tpoint_mesh->touch_Y,
+			                             &pressure);
+			if (tpoint_mesh->touch_state) {
+				tpoint_mesh->highlight_value = 0.3f + 10.0f * pressure * pressure;
+				if (touchpad_press[touchpad_idx]) {
+					tpoint_mesh->highlight_value = 1.0f - tpoint_mesh->highlight_value;
+				}
+				tpoint_mesh->highlight_value = SDL_clamp(tpoint_mesh->highlight_value, 0.0f, 1.0f);
+				tpoint_mesh->visible = true;
+			} else {
+				tpoint_mesh->highlight_value = 0.0f;
+				tpoint_mesh->visible = false;
+			}
+			tpoint_idx++;
+		}
+	}
+}
+
+// TODO: Add num_gripsenses check
+static void updateGripSenseState(controller_window &w) {
+	Mesh *gripsense_meshes[] = {
+		&w.model.meshes[(int)mesh_idx::left_gripsense],
+		&w.model.meshes[(int)mesh_idx::right_gripsense],
+	};
+
+	if (w.sdl_controller == NULL) {
+		for (size_t i = 0; i < SDL_arraysize(gripsense_meshes); i++) {
+			gripsense_meshes[i]->visible = false;
+		}
+		return;
+	}
+
+	const SDL_GamepadCapSenseType gripsenses[] = {
+		SDL_GAMEPAD_CAPSENSE_LEFT_GRIP,
+		SDL_GAMEPAD_CAPSENSE_RIGHT_GRIP,
+	};
+
+	for (size_t i = 0; i < SDL_arraysize(gripsense_meshes); i++) {
+		gripsense_meshes[i]->visible = SDL_GetGamepadCapSense(w.sdl_controller, gripsenses[i]);
+		gripsense_meshes[i]->highlight_value = gripsense_meshes[i]->visible ? 0.4f : 0.0f;
 	}
 }
 
@@ -423,7 +454,8 @@ static void updateControllerState() {
 		updateStickState(w);
 		updateTriggerState(w);
 		updateButtonState(w);
-		updateTouchpadState(w);
+		updateTouchPointState(w);
+		updateGripSenseState(w);
 	}
 }
 
@@ -437,9 +469,11 @@ static void gamepadAdded(const SDL_Event *event) {
 		for (size_t i = 0; i < windows.size(); i++) {
 			controller_window &w = windows[i];
 			w.sdl_id = 0;
+			clearTouchpads(w);
 			w.sdl_controller = SDL_OpenGamepad(ids[0]);
 			if (w.sdl_controller != NULL) {
 				w.sdl_id = ids[0];
+				configureTouchpads(w);
 				char *default_mapping = SDL_GetGamepadMapping(w.sdl_controller);
 				if (default_mapping != NULL) {
 					w.default_mapping = default_mapping;

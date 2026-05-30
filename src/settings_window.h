@@ -21,6 +21,37 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui-filebrowser/imfilebrowser.h"
 
+enum class input_idx {
+    none = -1,
+    south_button,
+    east_button,
+    west_button,
+    north_button,
+    back_button,
+    guide_button,
+    start_button,
+    left_stick_click,
+    right_stick_click,
+    left_shoulder,
+    right_shoulder,
+    dpad_up,
+    dpad_down,
+    dpad_left,
+    dpad_right,
+    misc1,
+    paddle1,
+    paddle2,
+    paddle3,
+    paddle4,
+    touchpad_click, // Left trackpad click
+    misc2,          // Right trackpad click
+    misc3,
+    misc4,
+    misc5,
+    misc6,
+    num_input
+};
+
 typedef struct controller_window_struct controller_window;
 
 typedef struct my_tab{

@@ -13,5 +13,4 @@ add_executable(${PROJECT_SHORTNAME}
     shader.cpp
     shader.h
     shaders.h
-    strings_3dco.h
 )

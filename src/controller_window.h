@@ -64,7 +64,9 @@ typedef struct controller_window_struct{
 	SDL_JoystickID sdl_id = 0;
 	SDL_Gamepad* sdl_controller = NULL;
 	std::string default_mapping;
-				
+	int num_touchpads = 0;
+	int num_fingers[2] = {0, 0};
+
 	bool left_click = false;
 	double left_click_x = 0;
 	double left_click_y = 0;
@@ -142,6 +144,10 @@ typedef struct controller_window_struct{
 	std::string mesh_name = "";
 	Model model;
 }controller_window;
+
+void clearTouchpads(controller_window &w);
+
+void configureTouchpads(controller_window &w);
 
 void createControllerWindow(std::string title, std::string model_path);
 

@@ -5,110 +5,120 @@
 #include "config.h"
 #include "window_icon.h"
 #include "settings_window.h"
-#include "strings_3dco.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4100)
 #endif
 
-std::string mesh_filenames[32] = {
-    "top_shell.obj",
-    "bottom_shell.obj",
-    "extra.obj",
-    "left_trigger.obj",
-    "right_trigger.obj",
-    "left_stick.obj",
-    "right_stick.obj",
-    "left_ring.obj",
-    "right_ring.obj",
-    "a_button.obj",
-    "b_button.obj",
-    "x_button.obj",
-    "y_button.obj",
-    "back_button.obj",
-    "guide_button.obj",
-    "start_button.obj",
-    "left_cap.obj",
-    "right_cap.obj",
-    "left_bumper.obj",
-    "right_bumper.obj",
-    "dpad_up.obj",
-    "dpad_down.obj",
-    "dpad_left.obj",
-    "dpad_right.obj",
-    "misc.obj",
-    "paddle1.obj",
-    "paddle2.obj",
-    "paddle3.obj",
-    "paddle4.obj",
-    "touchpad.obj",
-    "touch_point1.obj",
-    "touch_point2.obj"
+static std::string mesh_names[] = {
+    "Top Shell",
+    "Bottom Shell",
+    "Extra",
+    "Left Trigger",
+    "Right Trigger",
+    "Left Stick Base",
+    "Right Stick Base",
+    "Left Stick Ring",
+    "Right Stick Ring",
+    "South Button",
+    "East Button",
+    "West Button",
+    "North Button",
+    "Back Button",
+    "Guide Button",
+    "Start Button",
+    "Left Stick Cap",
+    "Right Stick Cap",
+    "Left Shoulder",
+    "Right Shoulder",
+    "D-Pad Up",
+    "D-Pad Down",
+    "D-Pad Left",
+    "D-Pad Right",
+    "Misc 1",
+    "Paddle 1",
+    "Paddle 2",
+    "Paddle 3",
+    "Paddle 4",
+    "Touchpad (Left Trackpad)",
+    "Misc 2 (Right Trackpad)",
+    "Misc 3",
+    "Misc 4",
+    "Misc 5",
+    "Misc 6",
+    "Touch Point 1",
+    "Touch Point 2",
+    "Left Grip Sense",
+    "Right Grip Sense",
 };
 
-std::string invalid_characters = "\\/:*?\"<>|";
-
-std::string mapping_names[27] = {
-	"a",
-	"b",
-	"x",
-	"y",
-	"back",
-	"guide",
-	"start",
-	"leftstick",
-	"rightstick",
-	"leftshoulder",
-	"rightshoulder",
-	"dpup",
-	"dpdown",
-	"dpleft",
-	"dpright",
-	"touchpad",
-	"misc",
-	"paddle1",
-	"paddle2",
-	"paddle3",
-	"paddle4",
-	"leftx",
-	"lefty",
-	"rightx",
-	"righty",
-	"lefttrigger",
-	"righttrigger"
+static std::string input_names[] = {
+    "South Button",
+    "East Button",
+    "West Button",
+    "North Button",
+    "Back Button",
+    "Guide Button",
+    "Start Button",
+    "Left Stick Click",
+    "Right Stick Click",
+    "Left Shoulder",
+    "Right Shoulder",
+    "D-Pad Up",
+    "D-Pad Down",
+    "D-Pad Left",
+    "D-Pad Right",
+    "Misc 1",
+    "Paddle 1",
+    "Paddle 2",
+    "Paddle 3",
+    "Paddle 4",
+    "Touchpad Click (Left Trackpad Click)",
+    "Misc 2 (Right Trackpad Click)",
+    "Misc 3",
+    "Misc 4",
+    "Misc 5",
+    "Misc 6",
 };
 
-std::string input_names[27] = {
-	"a button",
-	"b button",
-	"x button",
-	"y button",
-	"back button",
-	"guide button",
-	"start button",
-	"left stick click",
-	"right stick click",
-	"left bumper",
-	"right bumper",
-	"dpad up",
-	"dpad down",
-	"dpad left",
-	"dpad right",
-	"touchpad click",
-	"misc button",
-	"paddle 1",
-	"paddle 2",
-	"paddle 3",
-	"paddle 4",
-	"left stick x-axis",
-	"left stick y-axis",
-	"right stick x-axis",
-	"right stick y-axis",
-	"left trigger",
-	"right trigger"
+static std::string invalid_characters = "\\/:*?\"<>|";
+
+static std::string mapping_names[] = {
+    "a",
+    "b",
+    "x",
+    "y",
+    "back",
+    "guide",
+    "start",
+    "leftstick",
+    "rightstick",
+    "leftshoulder",
+    "rightshoulder",
+    "dpup",
+    "dpdown",
+    "dpleft",
+    "dpright",
+    "misc1",
+    "paddle1",
+    "paddle2",
+    "paddle3",
+    "paddle4",
+    "touchpad",
+    "misc2",
+    "misc3",
+    "misc4",
+    "misc5",
+    "misc6",
+    "leftx",
+    "lefty",
+    "rightx",
+    "righty",
+    "lefttrigger",
+    "righttrigger",
 };
 
-std::string current_mapping[27];
+static std::string current_mapping[SDL_arraysize(mapping_names)];
 
 bool remap = false;
 std::string rebind_string = "";
@@ -166,9 +176,9 @@ std::string binding_names[48] = {
 
 unsigned int tabs_made = 0;
 unsigned selected_tab = 0;
-unsigned selected_mesh = 0;
-unsigned material_mesh = 0;
-unsigned texture_mesh = 0;
+int selected_mesh = 0;
+int material_mesh = 0;
+int texture_mesh = 0;
 			
 GLFWwindow* glfw_settings_window;
 GLFWmonitor* primary_monitor;
@@ -502,9 +512,11 @@ void drawSettingsWindow(){
 					if (gamepad_name != NULL && ImGui::Selectable(gamepad_name)) {
 						SDL_AddGamepadMapping(current_window->default_mapping.c_str());
 						current_window->sdl_id = 0;
+						clearTouchpads(*current_window);
 						current_window->sdl_controller = SDL_OpenGamepad(ids[i]);
 						if (current_window->sdl_controller != NULL) {
 							current_window->sdl_id = ids[i];
+							configureTouchpads(*current_window);
 							if (SDL_GamepadHasSensor(current_window->sdl_controller, SDL_SENSOR_GYRO)) {
 								SDL_SetGamepadSensorEnabled(current_window->sdl_controller, SDL_SENSOR_GYRO, current_window->gyro_enabled);
 							}
@@ -535,8 +547,8 @@ void drawSettingsWindow(){
 				ImGui::SliderInt("L-Stick Highlight Deadzone", &current_window->model.meshes[7].ring_highlight_deadzone, 0, 100);
 				ImGui::SliderInt("R-Stick Highlight Deadzone", &current_window->model.meshes[8].ring_highlight_deadzone, 0, 100);
 				ImGui::ColorEdit3("Hightlight Color", current_window->highlight_color);
-				for(int i = 3; i<32; i++){
-					if(i != 5 && i != 6){
+				for (int i = (int)mesh_idx::left_trigger; i < (int)mesh_idx::num_mesh; i++) {
+					if (i != (int)mesh_idx::left_stick_base && i != (int)mesh_idx::right_stick_base) {
 						current_window->model.meshes[i].material.highlight[0] = current_window->highlight_color[0];
 						current_window->model.meshes[i].material.highlight[1] = current_window->highlight_color[1];
 						current_window->model.meshes[i].material.highlight[2] = current_window->highlight_color[2];
@@ -547,7 +559,7 @@ void drawSettingsWindow(){
 			if(ImGui::TreeNode("Materials")){
 				static std::string mesh_name = mesh_names[selected_mesh].c_str();
 				if (ImGui::BeginCombo("Meshes", mesh_name.c_str(), 0)){
-					for(int i=0; i<IM_ARRAYSIZE(mesh_names); i++){
+					for (int i = 0; i < (int)mesh_idx::num_mesh; i++) {
 						if (ImGui::Selectable(mesh_names[i].c_str())){
 							mesh_name = mesh_names[i].c_str();
 							material_mesh = i;
@@ -571,7 +583,7 @@ void drawSettingsWindow(){
 			if(ImGui::TreeNode("Textures")){
 				static std::string mesh_name = mesh_names[selected_mesh].c_str();
 				if (ImGui::BeginCombo("Meshes", mesh_name.c_str(), 0)){
-					for(int i=0; i<IM_ARRAYSIZE(mesh_names); i++){
+					for (int i = 0; i < (int)mesh_idx::num_mesh; i++) {
 						if (ImGui::Selectable(mesh_names[i].c_str())){
 							mesh_name = mesh_names[i].c_str();
 							texture_mesh = i;
@@ -798,7 +810,7 @@ void drawSettingsWindow(){
 			ImGui::NewLine();
 			current_window->mesh_name = mesh_names[selected_mesh].c_str();
 			if (ImGui::BeginCombo("Meshes", current_window->mesh_name.c_str(), 0)){
-				for(int i=0; i<IM_ARRAYSIZE(mesh_names); i++){
+				for (int i = 0; i < (int)mesh_idx::num_mesh; i++) {
 					if (ImGui::Selectable(mesh_names[i].c_str())){
 						current_window->mesh_name = mesh_names[i].c_str();
 						selected_mesh = i;
@@ -841,7 +853,7 @@ void drawSettingsWindow(){
 			ImGui::InputFloat("Y Position", &current_window->model.meshes[selected_mesh].position[1], 0.01f, 1.0f, "%.3f");
 			ImGui::InputFloat("Z Position", &current_window->model.meshes[selected_mesh].position[2], 0.01f, 1.0f, "%.3f");
 			//LEFT STICK
-			if(selected_mesh == 5){
+			if (selected_mesh == (int)mesh_idx::left_stick_base) {
 				ImGui::NewLine();
 				if(ImGui::SliderAngle("Max Angle", &current_window->model.meshes[selected_mesh].stick_max, 0.0f, 45.0f)){
 					current_window->model.meshes[7].stick_max = current_window->model.meshes[5].stick_max;
@@ -849,7 +861,7 @@ void drawSettingsWindow(){
 				}
 			}
 			//RIGHT STICK
-			if(selected_mesh == 6){
+			if (selected_mesh == (int)mesh_idx::right_stick_base) {
 				ImGui::NewLine();
 				if(ImGui::SliderAngle("Max Angle", &current_window->model.meshes[selected_mesh].stick_max, 0.0f, 45.0f)){
 					current_window->model.meshes[8].stick_max = current_window->model.meshes[6].stick_max;
@@ -857,7 +869,7 @@ void drawSettingsWindow(){
 				}
 			}
 			//TRIGGERS
-			if(selected_mesh == 3 || selected_mesh == 4){
+			if (selected_mesh == (int)mesh_idx::left_trigger || selected_mesh == (int)mesh_idx::right_trigger) {
 				ImGui::NewLine();
 				ImGui::SliderAngle("Max Angle", &current_window->model.meshes[selected_mesh].trigger_max, 0.0f, 90.0f);
 				ImGui::NewLine();
@@ -874,13 +886,14 @@ void drawSettingsWindow(){
 				ImGui::SliderAngle("Popup Roll", &current_window->model.meshes[selected_mesh].popup_rotation[2], -180, 180);
 			}
 			//BUTTONS
-			if(selected_mesh > 8 && selected_mesh < 30){
+			if (selected_mesh >= (int)mesh_idx::south_button && selected_mesh < (int)mesh_idx::num_mesh) {
 				ImGui::NewLine();
 				ImGui::InputFloat("X Travel", &current_window->model.meshes[selected_mesh].travel[0], 0.01f, 1.0f, "%.3f");
 				ImGui::InputFloat("Y Travel", &current_window->model.meshes[selected_mesh].travel[1], 0.01f, 1.0f, "%.3f");
 				ImGui::InputFloat("Z Travel", &current_window->model.meshes[selected_mesh].travel[2], 0.01f, 1.0f, "%.3f");
 				//BUMPERS AN PADDLES
-				if((selected_mesh == 18 || selected_mesh == 19) || (selected_mesh > 24 && selected_mesh < 29)){
+				if ((selected_mesh == (int)mesh_idx::left_shoulder || selected_mesh == (int)mesh_idx::right_shoulder) ||
+				    (selected_mesh >= (int)mesh_idx::paddle1 && selected_mesh <= (int)mesh_idx::paddle4)) {
 					ImGui::NewLine();
 					ImGui::InputFloat("Popup Offset X", &current_window->model.meshes[selected_mesh].popup_offset[0], 0.01f, 1.0f, "%.3f");
 					ImGui::InputFloat("Popup Offset Y", &current_window->model.meshes[selected_mesh].popup_offset[1], 0.01f, 1.0f, "%.3f");
@@ -892,75 +905,74 @@ void drawSettingsWindow(){
 				}
 			}
 			//TOUCHPAD
-			if(selected_mesh == 29){
+			if (selected_mesh == (int)mesh_idx::touchpad || (selected_mesh == (int)mesh_idx::misc2 && current_window->num_touchpads == 2)) {
 				ImGui::NewLine();
-				if(ImGui::InputFloat("Touch Area Width",  &current_window->model.meshes[30].touch_width, 0.01f, 1.0f, "%.3f")){
-					current_window->model.meshes[31].touch_width = current_window->model.meshes[30].touch_width;
+				Mesh *tpoint1_mesh = &current_window->model.meshes[(int)mesh_idx::touch_point1];
+				Mesh *tpoint2_mesh = &current_window->model.meshes[(int)mesh_idx::touch_point2];
+				const bool dual = (current_window->num_touchpads == 2);
+				if (ImGui::InputFloat(dual ? "L/R Touch Area Width" : "Touch Area Width", &tpoint1_mesh->touch_width, 0.01f, 1.0f, "%.3f")) {
+					tpoint2_mesh->touch_width = tpoint1_mesh->touch_width;
 				}
-				if(ImGui::InputFloat("Touch Area Height",  &current_window->model.meshes[30].touch_height, 0.01f, 1.0f, "%.3f")){
-					current_window->model.meshes[31].touch_height = current_window->model.meshes[30].touch_height;
+				if (ImGui::InputFloat(dual ? "L/R Touch Area Height" : "Touch Area Height", &tpoint1_mesh->touch_height, 0.01f, 1.0f, "%.3f")) {
+					tpoint2_mesh->touch_height = tpoint1_mesh->touch_height;
 				}
 			}
 		}
-		if (ImGui::CollapsingHeader("Gyro")){
+		if (ImGui::CollapsingHeader("Gyro")) {
 			if (current_window->sdl_controller != NULL && SDL_GamepadHasSensor(current_window->sdl_controller, SDL_SENSOR_GYRO)) {
-				if (ImGui::Checkbox("Enable Gyro", &current_window->gyro_enabled)){
-					if (current_window->gyro_enabled){
+				if (ImGui::Checkbox("Enable Gyro", &current_window->gyro_enabled)) {
+					if (current_window->gyro_enabled) {
 						current_window->gyro_toggled = true;
 					}
 				}
 				ImGui::SliderInt("Gyro Correction", &current_window->gyro_correction, 0, 10);
-				if (ImGui::Button("Reset Gyro")){
+				if (ImGui::Button("Reset Gyro")) {
 					current_window->gyro_matrix = glm::mat4(1.0f);
 				}
 				ImGui::NewLine();
 				ImGui::Text("Reset Gyro button combo");
 				std::string button1_name = "";
-				if(current_window->reset_gyro_button1 > -1){
-					//button1_name = SDL_GetGamepadStringForButton((SDL_GamepadButton)current_window->reset_gyro_button1);
+				if (current_window->reset_gyro_button1 > (int)input_idx::none && current_window->reset_gyro_button1 < (int)input_idx::num_input) {
 					button1_name = input_names[current_window->reset_gyro_button1].c_str();
-				}else{
-					button1_name = "none";
+				} else {
+					button1_name = "None";
 				}
-				if (ImGui::BeginCombo("Button 1", button1_name.c_str(), 0)){
-					for (unsigned i = 0; i < 22; i++){
-						if (i>0){
-							//if (ImGui::Selectable(SDL_GetGamepadStringForButton((SDL_GamepadButton)(i-1)))){
-							if (ImGui::Selectable(input_names[i-1].c_str())){
-								current_window->reset_gyro_button1 = i-1;
+				if (ImGui::BeginCombo("Button 1", button1_name.c_str(), 0)) {
+					for (int i = (int)input_idx::none; i < (int)input_idx::num_input; i++) {
+						if (i > (int)input_idx::none) {
+							if (ImGui::Selectable(input_names[i].c_str())) {
+								current_window->reset_gyro_button1 = i;
 							}
-						}else{
-							if (ImGui::Selectable("none")){
-								current_window->reset_gyro_button1 = -1;
+						} else {
+							if (ImGui::Selectable("None")) {
+								current_window->reset_gyro_button1 = (int)input_idx::none;
 							}
 						}
 					}
 					ImGui::EndCombo();
 				}
 				std::string button2_name = "";
-				if(current_window->reset_gyro_button2 > -1){
-					//button2_name = SDL_GetGamepadStringForButton((SDL_GamepadButton)current_window->reset_gyro_button2);
+				if (current_window->reset_gyro_button2 > (int)input_idx::none && current_window->reset_gyro_button2 < (int)input_idx::num_input) {
 					button2_name = input_names[current_window->reset_gyro_button2].c_str();
-				}else{
-					button2_name = "none";
+				} else {
+					button2_name = "None";
 				}
-				if (ImGui::BeginCombo("Button 2", button2_name.c_str(), 0)){
-					for (unsigned i = 0; i < 22; i++){
-						if (i>0){
-							//if (ImGui::Selectable(SDL_GetGamepadStringForButton((SDL_GamepadButton)(i-1)))){
-							if (ImGui::Selectable(input_names[i-1].c_str())){
-								current_window->reset_gyro_button2 = i-1;
+				if (ImGui::BeginCombo("Button 2", button2_name.c_str(), 0)) {
+					for (int i = (int)input_idx::none; i < (int)input_idx::num_input; i++) {
+						if (i > (int)input_idx::none) {
+							if (ImGui::Selectable(input_names[i].c_str())) {
+								current_window->reset_gyro_button2 = i;
 							}
-						}else{
-							if (ImGui::Selectable("none")){
-								current_window->reset_gyro_button2 = -1;
+						} else {
+							if (ImGui::Selectable("None")) {
+								current_window->reset_gyro_button2 = (int)input_idx::none;
 							}
 						}
 					}
 					ImGui::EndCombo();
 				}
-			}else{
-				ImGui::Text("No Gyroscope detected for selected controller.");
+			} else {
+				ImGui::Text("No gyroscope detected for selected controller.");
 			}
 		}
 		if (ImGui::CollapsingHeader("Lighting")){
@@ -1215,20 +1227,20 @@ void drawSettingsWindow(){
 				ImGui::TreePop();
 			}
 		}
-		if (ImGui::CollapsingHeader("Mapping")){
+		if (ImGui::CollapsingHeader("Mapping")) {
 			std::vector<std::string> mapping = get_current_mapping(current_window->sdl_controller);
-			for(std::string s : mapping){
+			for(std::string s : mapping) {
 				std::vector<std::string> binding = get_binding(s);
-				for (int i = 0; i < 27; i++){
-					if(binding[0] == mapping_names[i]){
+				for (size_t i = 0; i < SDL_arraysize(mapping_names); i++) {
+					if (binding[0] == mapping_names[i]) {
 						current_mapping[i] = binding[1];
 					}
 				}
 			}
-			static unsigned current_input = 0;
+			static size_t current_input = 0;
 			std::string input_name = input_names[current_input];
 			if (ImGui::BeginCombo("Input", input_name.c_str(), 0)){
-				for (unsigned i = 0; i < 27; i++){
+				for (size_t i = 0; i < SDL_arraysize(input_names); i++) {
 					if (ImGui::Selectable(input_names[i].c_str())){
 						current_input = i;
 					}
@@ -1236,9 +1248,9 @@ void drawSettingsWindow(){
 				ImGui::EndCombo();
 			}
 			int current_binding = -1;
-			for (unsigned i = 0; i < IM_ARRAYSIZE(binding_names); i++){
+			for (size_t i = 0; i < SDL_arraysize(binding_names); i++) {
 				if(binding_names[i] == current_mapping[current_input]){
-					current_binding = i;
+					current_binding = (int)i;
 				}
 			}
 			std::string binding_name = "";
@@ -1246,7 +1258,7 @@ void drawSettingsWindow(){
 				binding_name = binding_names[current_binding];
 			}
 			if (ImGui::BeginCombo("Binding", binding_name.c_str(), 0)){
-				for (unsigned i = 0; i < IM_ARRAYSIZE(binding_names); i++){
+				for (size_t i = 0; i < SDL_arraysize(binding_names); i++) {
 					if (ImGui::Selectable(binding_names[i].c_str())){
 						//current_binding = i;
 						if(i == 0){
@@ -1297,7 +1309,7 @@ void drawSettingsWindow(){
 						open_ofstream(path);
 						//char* mapping = SDL_GetGamepadMapping(getControllerWindow(tabs[selected_tab].ID)->sdl_controller);
 						std::string save_mapping = "";
-						for(int i = 0; i < 27; i++){
+						for(size_t i = 0; i < SDL_arraysize(mapping_names); i++){
 							if (current_mapping[i] != ""){
 								save_mapping.append(mapping_names[i]);
 								save_mapping.append(":");
@@ -1307,7 +1319,6 @@ void drawSettingsWindow(){
 						}
 						write_line(save_mapping);
 						close_ofstream();
-						get_current_mapping(current_window->sdl_controller);
 						ImGui::CloseCurrentPopup();
 					}else{
                         std::cout << "Name contains invalid characters " << invalid_characters << std::endl;
@@ -1338,7 +1349,7 @@ void drawSettingsWindow(){
 								mapping_name.erase(0, pos + delimiter.length());
 							}
 							if (ImGui::Selectable(mapping_name.c_str())){
-								for (int i = 0; i < 27; i++){
+								for (size_t i = 0; i < SDL_arraysize(mapping_names); i++){
 									current_mapping[i] = "";
 								}
 								open_ifstream(mapping_path);
@@ -1687,8 +1698,8 @@ void loadTabs(){
 				getControllerWindow(tabs.back().ID)->highlight_color[1] = std::stof(lines[line_index + 1]);
 			if (line == "highlight blue")
 				getControllerWindow(tabs.back().ID)->highlight_color[2] = std::stof(lines[line_index + 1]);
-			for(int i = 3; i<32; i++){
-				if(i != 5 && i != 6){
+			for (int i = (int)mesh_idx::left_trigger; i < (int)mesh_idx::num_mesh; i++) {
+				if (i != (int)mesh_idx::left_stick_base && i != (int)mesh_idx::right_stick_base) {
 					getControllerWindow(tabs.back().ID)->model.meshes[i].material.highlight[0] = getControllerWindow(tabs.back().ID)->highlight_color[0];
 					getControllerWindow(tabs.back().ID)->model.meshes[i].material.highlight[1] = getControllerWindow(tabs.back().ID)->highlight_color[1];
 					getControllerWindow(tabs.back().ID)->model.meshes[i].material.highlight[2] = getControllerWindow(tabs.back().ID)->highlight_color[2];
@@ -1918,6 +1929,7 @@ std::vector<std::string> get_current_mapping(SDL_Gamepad* sdl_controller){
 			mapping.push_back(word);
 		}
 		SDL_free(gamepad_mapping);
+		// Remove platform and crc from mapping string.
 		if (!mapping.empty()) {
 			mapping.pop_back();
 		}
