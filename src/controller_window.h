@@ -66,6 +66,8 @@ typedef struct controller_window_struct{
 	std::string default_mapping;
 	int num_touchpads = 0;
 	int num_fingers[2] = {0, 0};
+	int num_gripsense = 0;
+	bool has_gripsense[2] = {false, false};
 
 	bool left_click = false;
 	double left_click_x = 0;
@@ -144,6 +146,10 @@ typedef struct controller_window_struct{
 	std::string mesh_name = "";
 	Model model;
 }controller_window;
+
+void clearGripSense(controller_window &w);
+
+void configureGripSense(controller_window &w);
 
 void clearTouchpads(controller_window &w);
 
