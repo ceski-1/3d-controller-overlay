@@ -171,6 +171,7 @@ typedef struct mesh_struct {
     float press = 0.0f;
     
     float highlight_value = 0.0f;
+    float released_value = 0.0f;
     int ring_highlight_deadzone = 10;
     bool popup = false;
     bool visible = true;
