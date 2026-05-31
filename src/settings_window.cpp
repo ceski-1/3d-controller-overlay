@@ -265,6 +265,8 @@ void createSettingsWindow(){
 	model_dialog.SetWindowSize(400, 300);
     model_dialog.SetTitle("Select Model File");
     model_dialog.SetTypeFilters({ ".obj" });
+
+    init_pref_path();
 }
 
 GLFWwindow* getSettingsWindow(){

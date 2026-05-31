@@ -6,12 +6,31 @@
 #include <filesystem>
 #include <SDL3/SDL.h>
 #include "settings.h"
+#include "config.h"
 
-const char *base_path = SDL_GetBasePath();
+static const char *pref_path = NULL;
 std::filesystem::path file_path;
 std::ofstream ofs;
 std::ifstream ifs;	
 	
+void init_pref_path() {
+    if (pref_path != NULL) {
+        return;
+    }
+    pref_path = SDL_GetBasePath();
+#if !defined(_WIN32)
+    char *out_path = SDL_GetPrefPath("", PROJECT_SHORTNAME);
+    if (out_path != NULL) {
+        const char *dup_path = (const char *)SDL_strdup(out_path);
+        if (dup_path != NULL) {
+            pref_path = dup_path;
+        }
+        SDL_free(out_path);
+    }
+    SDL_CreateDirectory(pref_path);
+#endif
+}
+
 void write_int(std::string label, int value){
     ofs << label.append("\n").c_str();
     ofs << std::to_string(value).append("\n").c_str();
@@ -42,7 +61,7 @@ void write_line(std::string line){
 }
 
 void open_ifstream(std::filesystem::path path){
-    file_path = std::filesystem::path(base_path);
+    file_path = std::filesystem::path(pref_path);
 	std::filesystem::path sub_path(path);
     file_path /= sub_path;
 	std::filesystem::create_directory(file_path.parent_path());
@@ -54,7 +73,7 @@ void open_ifstream(std::filesystem::path path){
 }
 
 void open_ofstream(std::filesystem::path path){
-    file_path = std::filesystem::path(base_path);
+    file_path = std::filesystem::path(pref_path);
 	std::filesystem::path sub_path(path);
     file_path /= sub_path;
 	std::filesystem::create_directory(file_path.parent_path());
@@ -74,7 +93,7 @@ void read_file(std::vector<std::string> *lines){
 }
 
 void get_directory_contents(std::vector<std::filesystem::path> *files, std::string path){
-    std::string dir_path = base_path;
+    std::string dir_path = pref_path;
     dir_path.append("/");
     dir_path.append(path);
     
@@ -89,7 +108,7 @@ void get_directory_contents(std::vector<std::filesystem::path> *files, std::stri
 }
 
 void list_directory(std::string path){
-    std::string dir_path = base_path;
+    std::string dir_path = pref_path;
     dir_path.append("/");
     dir_path.append(path);
     
@@ -104,7 +123,7 @@ void list_directory(std::string path){
 
 void clear_directory(std::string dir)
 {
-    std::string dir_path = base_path;
+    std::string dir_path = pref_path;
     dir_path.append("/");
     dir_path.append(dir);
     

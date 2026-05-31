@@ -6,6 +6,8 @@
 #include <string>
 #include <filesystem>
 
+void init_pref_path();
+
 void write_int(std::string label, int value);
 
 void write_float(std::string label, float value);
