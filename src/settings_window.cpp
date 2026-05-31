@@ -511,16 +511,8 @@ void drawSettingsWindow(){
 					const char *gamepad_name = SDL_GetGamepadNameForID(ids[i]);
 					if (gamepad_name != NULL && ImGui::Selectable(gamepad_name)) {
 						SDL_AddGamepadMapping(current_window->default_mapping.c_str());
-						current_window->sdl_id = 0;
-						clearTouchpads(*current_window);
-						clearStickSense(*current_window);
-						clearGripSense(*current_window);
-						current_window->sdl_controller = SDL_OpenGamepad(ids[i]);
-						if (current_window->sdl_controller != NULL) {
-							current_window->sdl_id = ids[i];
-							configureTouchpads(*current_window);
-							configureStickSense(*current_window);
-							configureGripSense(*current_window);
+						clearController(*current_window);
+						if (openController(*current_window, ids[i])) {
 							if (SDL_GamepadHasSensor(current_window->sdl_controller, SDL_SENSOR_GYRO)) {
 								SDL_SetGamepadSensorEnabled(current_window->sdl_controller, SDL_SENSOR_GYRO, current_window->gyro_enabled);
 							}

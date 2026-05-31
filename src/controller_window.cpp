@@ -27,7 +27,7 @@ unsigned int defaultHeight = 480;
 
 std::vector<controller_window> windows;
 
-void clearGripSense(controller_window &w) {
+static void clearGripSense(controller_window &w) {
 	w.num_gripsense = 0;
 	w.has_gripsense[0] = false;
 	w.has_gripsense[1] = false;
@@ -35,7 +35,7 @@ void clearGripSense(controller_window &w) {
 	w.model.meshes[(int)mesh_idx::right_gripsense].visible = false;
 }
 
-void configureGripSense(controller_window &w) {
+static void configureGripSense(controller_window &w) {
 	SDL_GamepadCapSenseType gripsenses[] = {
 		SDL_GAMEPAD_CAPSENSE_LEFT_GRIP,
 		SDL_GAMEPAD_CAPSENSE_RIGHT_GRIP,
@@ -50,7 +50,7 @@ void configureGripSense(controller_window &w) {
 	}
 }
 
-void clearStickSense(controller_window &w) {
+static void clearStickSense(controller_window &w) {
 	w.num_sticksense = 0;
 	w.has_sticksense[0] = false;
 	w.has_sticksense[1] = false;
@@ -58,7 +58,7 @@ void clearStickSense(controller_window &w) {
 	w.model.meshes[(int)mesh_idx::right_stick_cap].released_value = 0.0f;
 }
 
-void configureStickSense(controller_window &w) {
+static void configureStickSense(controller_window &w) {
 	SDL_GamepadCapSenseType sticksenses[] = {
 		SDL_GAMEPAD_CAPSENSE_LEFT_STICK,
 		SDL_GAMEPAD_CAPSENSE_RIGHT_STICK,
@@ -73,7 +73,7 @@ void configureStickSense(controller_window &w) {
 	}
 }
 
-void clearTouchpads(controller_window &w) {
+static void clearTouchpads(controller_window &w) {
 	w.num_touchpads = 0;
 	w.num_fingers[0] = 0;
 	w.num_fingers[1] = 0;
@@ -89,7 +89,7 @@ void clearTouchpads(controller_window &w) {
 	}
 }
 
-void configureTouchpads(controller_window &w) {
+static void configureTouchpads(controller_window &w) {
 	bool has_touchpads = false;
 	w.num_touchpads = SDL_GetNumGamepadTouchpads(w.sdl_controller);
 	w.num_touchpads = SDL_clamp(w.num_touchpads, 0, 2);
@@ -109,6 +109,26 @@ void configureTouchpads(controller_window &w) {
 	if (!has_touchpads) {
 		clearTouchpads(w);
 	}
+}
+
+void clearController(controller_window &w) {
+	w.sdl_controller = NULL;
+	w.sdl_id = 0;
+	clearTouchpads(w);
+	clearStickSense(w);
+	clearGripSense(w);
+}
+
+bool openController(controller_window &w, SDL_JoystickID instance_id) {
+	w.sdl_controller = SDL_OpenGamepad(instance_id);
+	if (w.sdl_controller != NULL) {
+		w.sdl_id = instance_id;
+		configureTouchpads(w);
+		configureStickSense(w);
+		configureGripSense(w);
+		return true;
+	}
+	return false;
 }
 
 void createControllerWindow(std::string title, std::string model_path){
@@ -177,20 +197,10 @@ void createControllerWindow(std::string title, std::string model_path){
 	loadModel(w.model, model_path);
 	w.model_name = get_top_folder(model_path);
 
-	w.sdl_controller = NULL;
-	w.sdl_id = 0;
-	clearTouchpads(w);
-	clearStickSense(w);
-	clearGripSense(w);
+	clearController(w);
 	SDL_JoystickID *ids = SDL_GetGamepads(NULL);
 	if (ids) {
-		w.sdl_controller = SDL_OpenGamepad(ids[0]);
-		if (w.sdl_controller != NULL) {
-			w.sdl_id = ids[0];
-			configureTouchpads(w);
-			configureStickSense(w);
-			configureGripSense(w);
-		}
+		openController(w, ids[0]);
 		SDL_free(ids);
 	}
 
@@ -557,16 +567,8 @@ static void gamepadAdded(const SDL_Event *event) {
 	if (ids && game_controllers == 1) {
 		for (size_t i = 0; i < windows.size(); i++) {
 			controller_window &w = windows[i];
-			w.sdl_id = 0;
-			clearTouchpads(w);
-			clearStickSense(w);
-			clearGripSense(w);
-			w.sdl_controller = SDL_OpenGamepad(ids[0]);
-			if (w.sdl_controller != NULL) {
-				w.sdl_id = ids[0];
-				configureTouchpads(w);
-				configureStickSense(w);
-				configureGripSense(w);
+			clearController(w);
+			if (openController(w, ids[0])) {
 				char *default_mapping = SDL_GetGamepadMapping(w.sdl_controller);
 				if (default_mapping != NULL) {
 					w.default_mapping = default_mapping;

@@ -149,17 +149,9 @@ typedef struct controller_window_struct{
 	Model model;
 }controller_window;
 
-void clearStickSense(controller_window &w);
+void clearController(controller_window &w);
 
-void configureStickSense(controller_window &w);
-
-void clearGripSense(controller_window &w);
-
-void configureGripSense(controller_window &w);
-
-void clearTouchpads(controller_window &w);
-
-void configureTouchpads(controller_window &w);
+bool openController(controller_window &w, SDL_JoystickID instance_id);
 
 void createControllerWindow(std::string title, std::string model_path);
 
