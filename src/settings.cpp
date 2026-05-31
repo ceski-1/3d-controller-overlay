@@ -12,7 +12,14 @@ static const char *pref_path = NULL;
 std::filesystem::path file_path;
 std::ofstream ofs;
 std::ifstream ifs;	
-	
+
+const char *get_pref_path() {
+    if (pref_path == NULL) {
+        init_pref_path();
+    }
+    return pref_path;
+}
+
 void init_pref_path() {
     if (pref_path != NULL) {
         return;

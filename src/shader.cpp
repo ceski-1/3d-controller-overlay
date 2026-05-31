@@ -1,4 +1,5 @@
 #include "shader.h"
+#include "settings.h"
 
 GLuint CompileShader(GLuint type, const char* shaderSource){
     GLuint shaderObject;
@@ -72,9 +73,9 @@ GLuint CreateShaderProgram(const char* vertexShaderSource, const char* fragmentS
 }
 
 std::string GetShaderSource(std::string path){
-    const char *base_path = SDL_GetBasePath();
+    const char *pref_path = get_pref_path();
     std::filesystem::path file_path;
-    file_path = std::filesystem::path(base_path);
+    file_path = std::filesystem::path(pref_path);
 	std::filesystem::path sub_path(path);
     file_path /= sub_path;
 

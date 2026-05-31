@@ -6,6 +6,8 @@
 #include <string>
 #include <filesystem>
 
+const char *get_pref_path();
+
 void init_pref_path();
 
 void write_int(std::string label, int value);

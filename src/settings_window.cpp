@@ -715,7 +715,7 @@ void drawSettingsWindow(){
 		}
 		if (ImGui::CollapsingHeader("Model")){
 			if (ImGui::BeginCombo("Models", current_window->model_name.c_str(), 0)){
-				std::string dir_path = SDL_GetBasePath();
+				std::string dir_path = get_pref_path();
 				dir_path.append("models/");
 				struct stat sb;
 				for (const auto & entry : std::filesystem::directory_iterator(dir_path)){
@@ -753,7 +753,7 @@ void drawSettingsWindow(){
                         std::string new_model_path = "models/";
                         new_model_path.append(name);
 
-						std::filesystem::path path(SDL_GetBasePath());
+						std::filesystem::path path(get_pref_path());
 						std::filesystem::path new_path(new_model_path);
 						path /= new_path;
 						std::filesystem::create_directory(path);
@@ -780,7 +780,7 @@ void drawSettingsWindow(){
                 ImGui::Text("Delete this model?");
                 if (ImGui::Button("Confirm")){
                     std::filesystem::remove_all(current_window->model.path);
-					std::string dir_path = SDL_GetBasePath();
+					std::string dir_path = get_pref_path();
 					dir_path.append("models/");
 					std::vector<std::string> model_folders;
 					struct stat sb;
@@ -1299,7 +1299,7 @@ void drawSettingsWindow(){
                     name_valid = valid;
 
                     if (valid){
-						std::filesystem::path path(SDL_GetBasePath());
+						std::filesystem::path path(get_pref_path());
 						path.append("mapping/");
 						std::filesystem::create_directory(path);
                         path.append(name);
@@ -1332,7 +1332,7 @@ void drawSettingsWindow(){
 			}
 			if (ImGui::BeginPopup("load")){
                 if(ImGui::BeginListBox("Mappings")){
-					std::string dir_path = SDL_GetBasePath();
+					std::string dir_path = get_pref_path();
 					dir_path.append("mapping/");
 					std::filesystem::create_directory(dir_path);
                     struct stat sb;
@@ -1415,7 +1415,7 @@ void drawSettingsWindow(){
 		const auto copy_options = std::filesystem::copy_options::overwrite_existing;
         std::filesystem::path from_path = model_dialog.GetSelected();
         SDL_Log("from_path : %s", from_path.c_str());
-		std::filesystem::path to_path = SDL_GetBasePath();
+		std::filesystem::path to_path = get_pref_path();
 		to_path.append(getControllerWindow(tabs[selected_tab].ID)->model.path);
 		to_path.append(mesh_filenames[selected_mesh]);
 		SDL_Log("to_path : %s", to_path.c_str());
@@ -1938,7 +1938,7 @@ std::vector<std::string> get_current_mapping(SDL_Gamepad* sdl_controller){
 }
 
 std::string get_first_model(){
-	std::string dir_path = SDL_GetBasePath();
+	std::string dir_path = get_pref_path();
 	dir_path.append("models/");
 	std::vector<std::string> model_folders;
 	struct stat sb;
