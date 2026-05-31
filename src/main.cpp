@@ -8,6 +8,8 @@
 bool gQuit = false;
 
 void InitializeProgram(){
+    SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
+
 	if(!SDL_Init(SDL_INIT_GAMEPAD)) {
         SDL_Log("Error: %s", SDL_GetError());
         exit(1);
