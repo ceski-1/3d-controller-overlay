@@ -9,7 +9,7 @@ bool gQuit = false;
 
 void InitializeProgram(){
 	if(!SDL_Init(SDL_INIT_GAMEPAD)) {
-        printf("Error: %s\n", SDL_GetError());
+        SDL_Log("Error: %s", SDL_GetError());
         exit(1);
     }
 	

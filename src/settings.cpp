@@ -49,7 +49,7 @@ void open_ifstream(std::filesystem::path path){
 
 	ifs = std::ifstream(file_path);
     if (!ifs){
-        std::cout << "Uh oh, file could not be opened for reading!" << std::endl;
+        SDL_Log("Uh oh, file could not be opened for reading!");
     }
 }
 
@@ -61,7 +61,7 @@ void open_ofstream(std::filesystem::path path){
 
 	ofs = std::ofstream(file_path);
     if (!ofs){
-        std::cout << "Uh oh, file could not be opened for writing!" << std::endl;
+        SDL_Log("Uh oh, file could not be opened for writing!");
     }
 }
 
@@ -96,7 +96,7 @@ void list_directory(std::string path){
     struct stat sb;
     if (stat(dir_path.c_str(), &sb) == 0){
         for (const auto & entry : std::filesystem::directory_iterator(dir_path))
-            std::cout << entry.path() << std::endl;
+            SDL_Log("%s", entry.path().c_str());
     }else{
         std::filesystem::create_directory(dir_path);
     }

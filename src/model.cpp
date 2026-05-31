@@ -67,7 +67,7 @@ void loadMesh(Mesh &m, std::string path){
         }
 
         if(words.size() > 3 && words[0] == "v"){
-            //std::cout << "line describes a position." << std::endl;
+            //SDL_Log("line describes a position.");
             vertex_position pos;
             pos.x =  std::stof(words[1]);
             pos.y =  std::stof(words[2]);
@@ -76,7 +76,7 @@ void loadMesh(Mesh &m, std::string path){
         }
 
         if(words.size() > 3 && words[0] == "vn"){
-            //std::cout << "line describes a normal." << std::endl;
+            //SDL_Log("line describes a normal.");
             vertex_normal norm;
             norm.x = std::stof(words[1]);
             norm.y = std::stof(words[2]);
@@ -85,7 +85,7 @@ void loadMesh(Mesh &m, std::string path){
         }
 
         if(words.size() > 2 && words[0] == "vt"){
-            //std::cout << "line describes a texture coordinate." << std::endl;
+            //SDL_Log("line describes a texture coordinate.");
             vertex_texcoord tex;
             tex.x = std::stof(words[1]);
             tex.y = std::stof(words[2]);
@@ -93,7 +93,7 @@ void loadMesh(Mesh &m, std::string path){
         }
 
         if(words.size() > 3 && words[0] == "f"){
-            //std::cout << "line describes a Face." << std::endl;
+            //SDL_Log("line describes a Face.");
             for(unsigned long i = 1; i < (unsigned long)(words.size() - 2); i++) {
                 int num_verts = (int)vertices.size();
                 indices.push_back(num_verts);
@@ -172,7 +172,7 @@ void loadMesh(Mesh &m, std::string path){
 void readInfo(Model &m, std::string path){
     std::ifstream info_file = std::ifstream(path);
     if (!info_file){
-        std::cout << "Uh oh, info file could not be opened for reading!" << std::endl;
+        SDL_Log("Uh oh, info file could not be opened for reading!");
     }else{    
         while (info_file){
             std::string line;
@@ -274,7 +274,7 @@ void loadTexture(GLuint &id, std::string path){
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }else{
-        std::cout << "Failed to load texture" << std::endl;
+        SDL_Log("Failed to load texture");
     }
     stbi_image_free(data);
 }

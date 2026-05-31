@@ -24,9 +24,9 @@ GLuint CompileShader(GLuint type, const char* shaderSource){
         glGetShaderInfoLog(shaderObject, length, &length, errorMessages);
 
         if(type == GL_VERTEX_SHADER){
-            printf("ERROR: GL_VERTEX_SHADER compilation failed!\n%s", errorMessages);
+            SDL_Log("ERROR: GL_VERTEX_SHADER compilation failed!\n%s", errorMessages);
         }else if(type == GL_FRAGMENT_SHADER){
-            printf("ERROR: GL_FRAGMENT_SHADER compilation failed!\n%s", errorMessages);
+            SDL_Log("ERROR: GL_FRAGMENT_SHADER compilation failed!\n%s", errorMessages);
         }
         SDL_free(errorMessages);
 
@@ -57,7 +57,7 @@ GLuint CreateShaderProgram(const char* vertexShaderSource, const char* fragmentS
         char *errorMessages = (char *)SDL_calloc(length, sizeof(*errorMessages));
         glGetProgramInfoLog(programObject, length, &length, errorMessages);
 
-        printf("ERROR: Shader Program linking failed! : %s\n", errorMessages);
+        SDL_Log("ERROR: Shader Program linking failed! : %s", errorMessages);
         SDL_free(errorMessages);
     }
     
@@ -83,7 +83,7 @@ std::string GetShaderSource(std::string path){
 	
 	ifs = std::ifstream(file_path);
     if (!ifs){
-        printf("Uh oh, file could not be opened for reading!\n");
+        SDL_Log("Uh oh, file could not be opened for reading!");
     }else{
         while (ifs){
             std::string line;
@@ -91,7 +91,7 @@ std::string GetShaderSource(std::string path){
             shader_source.append(line);
             shader_source.append("\n");
 	    }
-        //printf(shader_source.c_str());
+        //SDL_Log(shader_source.c_str());
     }
 
     return shader_source;

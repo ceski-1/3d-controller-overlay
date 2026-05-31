@@ -221,7 +221,7 @@ void createSettingsWindow(){
 	glfw_settings_window = glfwCreateWindow(640, 480, "3D Controller Overlay", NULL, NULL);
     if (glfw_settings_window == NULL)
     {
-        std::cout << "Failed to create settings window" << std::endl;
+        SDL_Log("Failed to create settings window");
         glfwTerminate();
     }
     glfwMakeContextCurrent(glfw_settings_window);
@@ -240,7 +240,7 @@ void createSettingsWindow(){
 	vid_mode = glfwGetVideoMode(primary_monitor);
 	
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
-        std::cout << "Failed to initialize GLAD" << std::endl;
+        SDL_Log("Failed to initialize GLAD");
     }
 
 	IMGUI_CHECKVERSION();
@@ -255,7 +255,7 @@ void createSettingsWindow(){
 
     ImGui_ImplGlfw_InitForOpenGL(glfw_settings_window, true);
     if(!ImGui_ImplOpenGL3_Init(glsl_version)){
-		std::cout << "failed to init imgui for opengl3." << std::endl;
+		SDL_Log("failed to init imgui for opengl3.");
 	}
 
 	texture_dialog.SetWindowSize(400, 300);
@@ -397,12 +397,12 @@ void drawSettingsWindow(){
 			if (ImGui::IsItemHovered())
                 ImGui::SetTooltip("Set title of window.");
 			ImGui::NewLine();
-			//std::cout << "*****************" << std::endl;
+			//SDL_Log("*****************");
 			if(ImGui::Checkbox("Always on Top", &current_window->always_on_top)){
 				glfwSetWindowAttrib(current_window->glfw_window, GLFW_FLOATING, 
 				current_window->always_on_top);
 			}
-			//std::cout << ">>>>>>>>>>>>>>>>>" << std::endl;
+			//SDL_Log(">>>>>>>>>>>>>>>>>");
 			if (ImGui::IsItemHovered())
                 ImGui::SetTooltip("Toggle if the window should be always on top of all other windows.");
 			if(ImGui::Checkbox("Borderless", &current_window->borderless)){
@@ -524,8 +524,7 @@ void drawSettingsWindow(){
 								current_window->default_mapping = "";
 							}
 						} else {
-							std::cout << "couldn't open sdl controller " << i << std::endl;
-							std::cout << SDL_GetError() << std::endl;
+							SDL_Log("couldn't open sdl controller: %s", SDL_GetError());
 						}
 					}
 				}
@@ -621,7 +620,7 @@ void drawSettingsWindow(){
 					}
 					ImGui::SameLine();
 					if (ImGui::ArrowButton("##up", ImGuiDir_Up)){
-						std::cout << "move texture up" << std::endl;
+						SDL_Log("move texture up");
 						if(current_texture > 0){
 							Texture temp = current_window->model.meshes[texture_mesh].textures[current_texture - 1];
 							current_window->model.meshes[texture_mesh].textures[current_texture - 1] = current_window->model.meshes[texture_mesh].textures[current_texture];
@@ -635,7 +634,7 @@ void drawSettingsWindow(){
 					}
 					ImGui::SameLine();
 					if (ImGui::ArrowButton("##down", ImGuiDir_Down)){
-						std::cout << "move texture down" << std::endl;
+						SDL_Log("move texture down");
 						if(current_texture < current_window->model.meshes[texture_mesh].textures.size() - 1){
 							Texture temp = current_window->model.meshes[texture_mesh].textures[current_texture + 1];
 							current_window->model.meshes[texture_mesh].textures[current_texture + 1] = current_window->model.meshes[texture_mesh].textures[current_texture];
@@ -763,7 +762,7 @@ void drawSettingsWindow(){
 						current_window->model_name = get_top_folder(current_window->model.path);
 						ImGui::CloseCurrentPopup();
 					}else{
-                        std::cout << "Name contains invalid characters " << invalid_characters << std::endl;
+                        SDL_Log("Name contains invalid characters: %s", invalid_characters.c_str());
 					}
                 }
                 if (!name_valid){
@@ -827,11 +826,11 @@ void drawSettingsWindow(){
 					std::string mesh_path = current_window->model.path;
 					mesh_path.append("/");
 					mesh_path.append(mesh_filenames[selected_mesh]);
-					std::cout << "mesh path : " << mesh_path.c_str() << std::endl;
+					SDL_Log("mesh path : %s", mesh_path.c_str());
 					if(std::remove(mesh_path.c_str()) == 0){
-						std::cout << "file deleted successfully." << std::endl;
+						SDL_Log("file deleted successfully.");
 					}else{
-						std::cout << "unable to delete file." << std::endl;
+						SDL_Log("unable to delete file.");
 					}
 					writeInfo(current_window->model, current_window->model.path);
 					glfwMakeContextCurrent(current_window->glfw_window);
@@ -1267,7 +1266,7 @@ void drawSettingsWindow(){
 						SDL_GUID guid = SDL_GetJoystickGUID(joystick);
 						char guid_string[100] = {};
 						SDL_GUIDToString(guid, guid_string, 100);
-						////std::cout << "GUID for controller is : " << guid_string << std::endl;
+						//SDL_Log("GUID for controller is : %s", guid_string);
 						std::string new_mapping = guid_string;
 						new_mapping.append(",");
 						new_mapping.append(SDL_GetGamepadName(current_window->sdl_controller));
@@ -1281,7 +1280,7 @@ void drawSettingsWindow(){
 								new_mapping.append(",");
 							}
 						}
-						std::cout << new_mapping << std::endl;
+						SDL_Log(new_mapping.c_str());
 						SDL_AddGamepadMapping(new_mapping.c_str());
 					}
 				}
@@ -1317,7 +1316,7 @@ void drawSettingsWindow(){
 						close_ofstream();
 						ImGui::CloseCurrentPopup();
 					}else{
-                        std::cout << "Name contains invalid characters " << invalid_characters << std::endl;
+                        SDL_Log("Name contains invalid characters: %s", invalid_characters.c_str());
 					}
                 }
                 if (!name_valid){
@@ -1351,18 +1350,18 @@ void drawSettingsWindow(){
 								open_ifstream(mapping_path);
 								std::vector<std::string> load_mapping;
 								read_file(&load_mapping);
-								std::cout << "mapping file : " << load_mapping[0] << std::endl;
+								SDL_Log("mapping file : %s", load_mapping[0].c_str());
 								SDL_Joystick* joystick = SDL_GetGamepadJoystick(getControllerWindow(tabs[selected_tab].ID)->sdl_controller);
 								SDL_GUID guid = SDL_GetJoystickGUID(joystick);
 								char guid_string[100] = {};
 								SDL_GUIDToString(guid, guid_string, 100);
-								//std::cout << "GUID for controller is : " << guid_string << std::endl;
+								//SDL_Log("GUID for controller is : %s", guid_string);
 								std::string mapping_string = guid_string;
 								mapping_string.append(",");
 								mapping_string.append(SDL_GetGamepadName(current_window->sdl_controller));
 								mapping_string.append(",");
 								mapping_string.append(load_mapping[0]);
-								std::cout << "mapping_string : " << mapping_string << std::endl;
+								SDL_Log("mapping_string : %s", mapping_string.c_str());
 								SDL_AddGamepadMapping(mapping_string.c_str());
 								close_ifstream();
 								ImGui::CloseCurrentPopup();
@@ -1398,7 +1397,7 @@ void drawSettingsWindow(){
 	model_dialog.Display();
 	
     if (texture_dialog.HasSelected()){
-		std::cout << "Selected filename : " << texture_dialog.GetSelected().string() << std::endl;
+		SDL_Log("Selected filename : %s", texture_dialog.GetSelected().c_str());
 		glfwMakeContextCurrent(getControllerWindow(tabs[selected_tab].ID)->glfw_window);
 		Texture t;
 		loadTexture(t.id, texture_dialog.GetSelected().string());
@@ -1410,14 +1409,14 @@ void drawSettingsWindow(){
 	}
 
 	if (model_dialog.HasSelected()){
-		std::cout << "Selected filename : " << model_dialog.GetSelected().string() << std::endl;
+		SDL_Log("Selected filename : %s", model_dialog.GetSelected().c_str());
 		const auto copy_options = std::filesystem::copy_options::overwrite_existing;
         std::filesystem::path from_path = model_dialog.GetSelected();
-        std::cout << "from_path : " << from_path.string() << std::endl;
+        SDL_Log("from_path : %s", from_path.c_str());
 		std::filesystem::path to_path = SDL_GetBasePath();
 		to_path.append(getControllerWindow(tabs[selected_tab].ID)->model.path);
 		to_path.append(mesh_filenames[selected_mesh]);
-		std::cout << "to_path : " << to_path.string() << std::endl;
+		SDL_Log("to_path : %s", to_path.c_str());
         std::filesystem::copy(from_path, to_path, copy_options);
 		writeInfo(getControllerWindow(tabs[selected_tab].ID)->model, getControllerWindow(tabs[selected_tab].ID)->model.path);
 		glfwMakeContextCurrent(getControllerWindow(tabs[selected_tab].ID)->glfw_window);
@@ -1876,10 +1875,10 @@ bool check_filename_valid(const char* name)
     bool valid = true;
     for (int i = 0; i < 32; i++)
     {
-        //std::cout << "name[" << i << "] : " << name[i] << std::endl;
+        //SDL_Log("name[%d] : %s", i, name[i]);
         for (char c : invalid_characters)
         {
-            //std::cout << c << std::endl;
+            //SDL_Log("%s", c);
             if (name[i] == c)
             {
                 valid = false;
@@ -1964,6 +1963,6 @@ void OsOpenInShell(const char* path){
 	#endif
 
 	char command[256];
-	snprintf(command, 256, "%s \"%s\"", open_executable.c_str(), path);
+	SDL_snprintf(command, 256, "%s \"%s\"", open_executable.c_str(), path);
 	[[maybe_unused]] int result = system(command);
 }

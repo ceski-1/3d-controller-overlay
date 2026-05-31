@@ -138,7 +138,7 @@ void createControllerWindow(std::string title, std::string model_path){
     glfwWindowHint(GLFW_SAMPLES, 4);
     w.glfw_window = glfwCreateWindow(defaultWidth, defaultHeight, title.c_str(), NULL, NULL);
     if (w.glfw_window == NULL){
-        std::cout << "Failed to create controller indow" << std::endl;
+        SDL_Log("Failed to create controller window");
         glfwTerminate();
     }
     glfwMakeContextCurrent(w.glfw_window);
@@ -217,8 +217,7 @@ void createControllerWindow(std::string title, std::string model_path){
 		}
 		w.gyro_matrix = glm::mat4(1.0f);
 	}else{
-		std::cout << "couldn't open sdl controller." << std::endl;
-		std::cout << SDL_GetError() << std::endl;
+		SDL_Log("couldn't open sdl controller: %s", SDL_GetError());
 	}
 	
 	windows.push_back(w);
@@ -300,9 +299,9 @@ void controller_window_scroll_callback(GLFWwindow* window, double xoffset, doubl
 
 void controller_window_iconify_callback(GLFWwindow* window, int iconified){
 	if (iconified){
-        std::cout << "the controller window has been iconified" << std::endl;
+        SDL_Log("the controller window has been iconified");
     }else{
-        std::cout << "the controller window has been restored" << std::endl;
+        SDL_Log("the controller window has been restored");
     }
 }
 
@@ -559,7 +558,8 @@ static void updateControllerState() {
 }
 
 static void gamepadAdded(const SDL_Event *event) {
-	std::cout << "game controller added." << std::endl;
+	const char *name = SDL_GetGamepadNameForID(event->gdevice.which);
+	SDL_Log("game controller added: %s", name ? name : "Unknown Controller");
 	
 	int game_controllers = 0;
 	SDL_JoystickID *ids = SDL_GetGamepads(&game_controllers);
@@ -580,8 +580,7 @@ static void gamepadAdded(const SDL_Event *event) {
 					SDL_SetGamepadSensorEnabled(w.sdl_controller, SDL_SENSOR_GYRO, true);
 				}
 			} else {
-				std::cout << "couldn't open sdl controller" << std::endl;
-				std::cout << SDL_GetError() << std::endl;
+				SDL_Log("couldn't open sdl controller: %s", SDL_GetError());
 			}
 		}
 	}
@@ -847,8 +846,8 @@ void drawControllerWindows(){
 			int height = 0;
 			glfwGetWindowSize(w.glfw_window, &width, &height);
 			glViewport(0, 0, width, height);
-			//std::cout << "width = " << width << std::endl;
-			//std::cout << "height = " << height << std::endl;
+			//SDL_Log("width = %d", width);
+			//SDL_Log("height = %d", height);
 			
 			update_camera(w, w.shader, width, height);
 			update_camera(w, w.light_source_shader, width, height);
