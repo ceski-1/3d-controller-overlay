@@ -518,13 +518,6 @@ void drawSettingsWindow(){
 							if (SDL_GamepadHasSensor(current_window->sdl_controller, SDL_SENSOR_GYRO)) {
 								SDL_SetGamepadSensorEnabled(current_window->sdl_controller, SDL_SENSOR_GYRO, current_window->gyro_enabled);
 							}
-							char *default_mapping = SDL_GetGamepadMapping(current_window->sdl_controller);
-							if (default_mapping != NULL) {
-								current_window->default_mapping = default_mapping;
-								SDL_free(default_mapping);
-							} else {
-								current_window->default_mapping = "";
-							}
 						} else {
 							SDL_Log("couldn't open sdl controller: %s", SDL_GetError());
 						}

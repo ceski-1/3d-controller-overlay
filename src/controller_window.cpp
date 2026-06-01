@@ -27,6 +27,18 @@ unsigned int defaultHeight = 480;
 
 std::vector<controller_window> windows;
 
+static void clearMapping(controller_window &w) {
+	w.default_mapping = "";
+}
+
+static void configureMapping(controller_window &w) {
+	char *mapping = SDL_GetGamepadMapping(w.sdl_controller);
+	if (mapping != NULL) {
+		w.default_mapping = mapping;
+		SDL_free(mapping);
+	}
+}
+
 static void clearGripSense(controller_window &w) {
 	w.num_gripsense = 0;
 	w.has_gripsense[0] = false;
@@ -114,6 +126,7 @@ static void configureTouchpads(controller_window &w) {
 void clearController(controller_window &w) {
 	w.sdl_controller = NULL;
 	w.sdl_id = 0;
+	clearMapping(w);
 	clearTouchpads(w);
 	clearStickSense(w);
 	clearGripSense(w);
@@ -123,6 +136,7 @@ bool openController(controller_window &w, SDL_JoystickID instance_id) {
 	w.sdl_controller = SDL_OpenGamepad(instance_id);
 	if (w.sdl_controller != NULL) {
 		w.sdl_id = instance_id;
+		configureMapping(w);
 		configureTouchpads(w);
 		configureStickSense(w);
 		configureGripSense(w);
@@ -205,13 +219,6 @@ void createControllerWindow(std::string title, std::string model_path){
 	}
 
 	if(w.sdl_controller != NULL){
-		char *default_mapping = SDL_GetGamepadMapping(w.sdl_controller);
-		if (default_mapping != NULL) {
-			w.default_mapping = default_mapping;
-			SDL_free(default_mapping);
-		} else {
-			w.default_mapping = "";
-		}
 		if (SDL_GamepadHasSensor(w.sdl_controller, SDL_SENSOR_GYRO)){
 			SDL_SetGamepadSensorEnabled(w.sdl_controller, SDL_SENSOR_GYRO, true);
 		}
@@ -569,13 +576,6 @@ static void gamepadAdded(const SDL_Event *event) {
 			controller_window &w = windows[i];
 			clearController(w);
 			if (openController(w, ids[0])) {
-				char *default_mapping = SDL_GetGamepadMapping(w.sdl_controller);
-				if (default_mapping != NULL) {
-					w.default_mapping = default_mapping;
-					SDL_free(default_mapping);
-				} else {
-					w.default_mapping = "";
-				}
 				if (SDL_GamepadHasSensor(w.sdl_controller, SDL_SENSOR_GYRO)) {
 					SDL_SetGamepadSensorEnabled(w.sdl_controller, SDL_SENSOR_GYRO, true);
 				}
