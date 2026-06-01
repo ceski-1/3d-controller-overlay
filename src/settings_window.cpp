@@ -81,7 +81,7 @@ static std::string input_names[] = {
     "Misc 6",
 };
 
-static std::string invalid_characters = "\\/:*?\"<>|";
+static constexpr char invalid_characters[] = "\\/:*?\"<>|";
 
 static std::string mapping_names[] = {
     "a",
@@ -764,11 +764,11 @@ void drawSettingsWindow(){
 						current_window->model_name = get_top_folder(current_window->model.path);
 						ImGui::CloseCurrentPopup();
 					}else{
-                        SDL_Log("Name contains invalid characters: %s", invalid_characters.c_str());
+                        SDL_Log("Name contains invalid characters: %s", invalid_characters);
 					}
                 }
                 if (!name_valid){
-                    ImGui::Text("Name cannot include characters \\/:*?\"<>|");
+                    ImGui::Text("Name cannot include characters %s", invalid_characters);
 				}
                 ImGui::EndPopup();
             }
@@ -1318,11 +1318,11 @@ void drawSettingsWindow(){
 						close_ofstream();
 						ImGui::CloseCurrentPopup();
 					}else{
-                        SDL_Log("Name contains invalid characters: %s", invalid_characters.c_str());
+                        SDL_Log("Name contains invalid characters: %s", invalid_characters);
 					}
                 }
                 if (!name_valid){
-                    ImGui::Text("Name cannot include characters \\/:*?\"<>|");
+                    ImGui::Text("Name cannot include characters %s", invalid_characters);
 				}
                 ImGui::EndPopup();
             }
