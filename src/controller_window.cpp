@@ -39,6 +39,18 @@ static void configureMapping(controller_window &w) {
 	}
 }
 
+void clearGyro(controller_window &w) {
+	SDL_memset(w.gyro_data, 0, sizeof(w.gyro_data));
+	w.gyro_time = 0;
+	w.last_gyro_time = 0;
+}
+
+static void configureGyro(controller_window &w) {
+	if (SDL_GamepadHasSensor(w.sdl_controller, SDL_SENSOR_GYRO)) {
+		SDL_SetGamepadSensorEnabled(w.sdl_controller, SDL_SENSOR_GYRO, true);
+	}
+}
+
 static void clearGripSense(controller_window &w) {
 	w.num_gripsense = 0;
 	w.has_gripsense[0] = false;
@@ -127,6 +139,7 @@ void clearController(controller_window &w) {
 	w.sdl_controller = NULL;
 	w.sdl_id = 0;
 	clearMapping(w);
+	clearGyro(w);
 	clearTouchpads(w);
 	clearStickSense(w);
 	clearGripSense(w);
@@ -137,6 +150,7 @@ bool openController(controller_window &w, SDL_JoystickID instance_id) {
 	if (w.sdl_controller != NULL) {
 		w.sdl_id = instance_id;
 		configureMapping(w);
+		configureGyro(w);
 		configureTouchpads(w);
 		configureStickSense(w);
 		configureGripSense(w);
@@ -214,19 +228,12 @@ void createControllerWindow(std::string title, std::string model_path){
 	clearController(w);
 	SDL_JoystickID *ids = SDL_GetGamepads(NULL);
 	if (ids) {
-		openController(w, ids[0]);
+		if (!openController(w, ids[0])) {
+			SDL_Log("couldn't open sdl controller: %s", SDL_GetError());
+		}
 		SDL_free(ids);
 	}
 
-	if(w.sdl_controller != NULL){
-		if (SDL_GamepadHasSensor(w.sdl_controller, SDL_SENSOR_GYRO)){
-			SDL_SetGamepadSensorEnabled(w.sdl_controller, SDL_SENSOR_GYRO, true);
-		}
-		w.gyro_matrix = glm::mat4(1.0f);
-	}else{
-		SDL_Log("couldn't open sdl controller: %s", SDL_GetError());
-	}
-	
 	windows.push_back(w);
 }
 
@@ -331,12 +338,6 @@ static void updateGyroState(controller_window &w) {
 	}
 
 	if (w.gyro_time == 0 || (w.gyro_data[0] == 0.0f && w.gyro_data[1] == 0.0f && w.gyro_data[2] == 0.0f)) {
-		return;
-	}
-
-	if (w.gyro_toggled) {
-		w.last_gyro_time = w.gyro_time;
-		w.gyro_toggled = false;
 		return;
 	}
 
@@ -575,11 +576,7 @@ static void gamepadAdded(const SDL_Event *event) {
 		for (size_t i = 0; i < windows.size(); i++) {
 			controller_window &w = windows[i];
 			clearController(w);
-			if (openController(w, ids[0])) {
-				if (SDL_GamepadHasSensor(w.sdl_controller, SDL_SENSOR_GYRO)) {
-					SDL_SetGamepadSensorEnabled(w.sdl_controller, SDL_SENSOR_GYRO, true);
-				}
-			} else {
+			if (!openController(w, ids[0])) {
 				SDL_Log("couldn't open sdl controller: %s", SDL_GetError());
 			}
 		}

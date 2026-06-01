@@ -110,7 +110,6 @@ typedef struct controller_window_struct{
 	glm::vec3 freelook_direction = glm::vec3(0.0f, 0.0f, -1.0f);
 
 	glm::mat4 gyro_matrix = glm::mat4(1.0f);
-	bool gyro_toggled = false;
 	bool gyro_enabled = false;
 	float gyro_data[3] = {0.0f, 0.0f, 0.0f};
 	Uint64 gyro_time = 0;
@@ -148,6 +147,8 @@ typedef struct controller_window_struct{
 	std::string mesh_name = "";
 	Model model;
 }controller_window;
+
+void clearGyro(controller_window &w);
 
 void clearController(controller_window &w);
 

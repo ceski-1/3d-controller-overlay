@@ -514,11 +514,7 @@ void drawSettingsWindow(){
 					if (gamepad_name != NULL && ImGui::Selectable(gamepad_name)) {
 						SDL_AddGamepadMapping(current_window->default_mapping.c_str());
 						clearController(*current_window);
-						if (openController(*current_window, ids[i])) {
-							if (SDL_GamepadHasSensor(current_window->sdl_controller, SDL_SENSOR_GYRO)) {
-								SDL_SetGamepadSensorEnabled(current_window->sdl_controller, SDL_SENSOR_GYRO, current_window->gyro_enabled);
-							}
-						} else {
+						if (!openController(*current_window, ids[i])) {
 							SDL_Log("couldn't open sdl controller: %s", SDL_GetError());
 						}
 					}
@@ -911,9 +907,7 @@ void drawSettingsWindow(){
 		if (ImGui::CollapsingHeader("Gyro")) {
 			if (current_window->sdl_controller != NULL && SDL_GamepadHasSensor(current_window->sdl_controller, SDL_SENSOR_GYRO)) {
 				if (ImGui::Checkbox("Enable Gyro", &current_window->gyro_enabled)) {
-					if (current_window->gyro_enabled) {
-						current_window->gyro_toggled = true;
-					}
+					clearGyro(*current_window);
 				}
 				ImGui::SliderInt("Gyro Correction", &current_window->gyro_correction, 0, 10);
 				if (ImGui::Button("Reset Gyro")) {
@@ -1771,11 +1765,7 @@ void loadTabs(){
 			}
 			//Motion Settings
 			if (line == "gyro enabled"){
-				controller_window *w = getControllerWindow(tabs.back().ID);
-				w->gyro_enabled = std::stoi(lines[line_index + 1]);
-				if (w->sdl_controller != NULL && SDL_GamepadHasSensor(w->sdl_controller, SDL_SENSOR_GYRO)) {
-					SDL_SetGamepadSensorEnabled(w->sdl_controller, SDL_SENSOR_GYRO, w->gyro_enabled);
-				}
+				getControllerWindow(tabs.back().ID)->gyro_enabled = std::stoi(lines[line_index + 1]);
 			}
 			if (line == "reset gyro button 1")
 				getControllerWindow(tabs.back().ID)->reset_gyro_button1 = std::stoi(lines[line_index + 1]);
