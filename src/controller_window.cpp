@@ -625,11 +625,18 @@ static void handleEvents() {
 }
 
 void controller_window_input() {
+	for (size_t i = 0; i < windows.size(); i++) {
+		if (glfwWindowShouldClose(windows[i].glfw_window)) {
+			close_window(windows[i].ID);
+			return;
+		}
+	}
+
 	SDL_PumpEvents();
 	handleEvents();
 	updateControllerState();
 
-	for(unsigned i = 0; i<windows.size(); ++i){
+	for (size_t i = 0; i < windows.size(); i++) {
 		if(glfwGetMouseButton(windows[i].glfw_window, GLFW_MOUSE_BUTTON_1)){
 			if(windows[i].drag_to_move){
 				int x = 0;
@@ -687,9 +694,6 @@ void controller_window_input() {
 				windows[i].right_click = false;
 			}
 		}
-		
-		if(glfwWindowShouldClose(windows[i].glfw_window))
-			close_window(windows[i].ID);
 		
 		if (windows[i].freelook){
 			const float move_speed = (float)(windows[i].move_speed * 0.5f * windows[i].deltaTime);
