@@ -17,7 +17,9 @@ top_shell.obj
 0
 0
 0
+0
 bottom_shell.obj
+0
 0
 0
 0
@@ -55,6 +57,7 @@ extra.obj
 0
 0
 0
+0
 left_trigger.obj
 -0.62
 -0.1
@@ -69,6 +72,7 @@ left_trigger.obj
 0
 0
 0.575959
+0
 0
 0
 0
@@ -93,6 +97,7 @@ right_trigger.obj
 0
 0
 0
+0
 left_stick_base.obj
 -0.33
 0.11
@@ -108,6 +113,7 @@ left_stick_base.obj
 0
 0
 0.436332
+0
 0
 0
 0
@@ -131,6 +137,7 @@ right_stick_base.obj
 0
 0
 0
+0
 left_stick_ring.obj
 -0.33
 0.11
@@ -146,6 +153,7 @@ left_stick_ring.obj
 0
 0
 0.436332
+0
 0
 0
 0
@@ -169,7 +177,9 @@ right_stick_ring.obj
 0
 0
 0
+0
 south_button.obj
+0
 0
 0
 0
@@ -207,7 +217,9 @@ east_button.obj
 0
 0
 0
+0
 west_button.obj
+0
 0
 0
 0
@@ -245,7 +257,9 @@ north_button.obj
 0
 0
 0
+0
 back_button.obj
+0
 0
 0
 0
@@ -283,7 +297,9 @@ guide_button.obj
 0
 0
 0
+0
 start_button.obj
+0
 0
 0
 0
@@ -321,6 +337,7 @@ left_stick_cap.obj
 0
 0
 0
+0
 right_stick_cap.obj
 0.33
 0.11
@@ -340,6 +357,7 @@ right_stick_cap.obj
 0
 0
 0
+0
 left_shoulder.obj
 -0.64
 0.05
@@ -351,6 +369,7 @@ left_shoulder.obj
 0.1
 -0.1
 1.5708
+0
 0
 0
 0
@@ -378,7 +397,9 @@ right_shoulder.obj
 0
 0
 0
+0
 dpad_up.obj
+0
 0
 0
 0
@@ -416,7 +437,9 @@ dpad_down.obj
 0
 0
 0
+0
 dpad_left.obj
+0
 0
 0
 0
@@ -454,7 +477,9 @@ dpad_right.obj
 0
 0
 0
+0
 misc1.obj
+0
 0
 0
 0
@@ -492,7 +517,9 @@ paddle1.obj
 0
 0
 0
+0
 paddle2.obj
+0
 0
 0
 0
@@ -530,7 +557,9 @@ paddle3.obj
 0
 0
 0
+0
 paddle4.obj
+0
 0
 0
 0
@@ -568,7 +597,9 @@ touchpad.obj
 0
 0
 0
+0
 misc2.obj
+0
 0
 0
 0
@@ -606,7 +637,9 @@ misc3.obj
 0
 0
 0
+0
 misc4.obj
+0
 0
 0
 0
@@ -644,7 +677,9 @@ misc5.obj
 0
 0
 0
+0
 misc6.obj
+0
 0
 0
 0
@@ -682,6 +717,7 @@ touch_point1.obj
 0.24
 0
 0
+0
 touch_point2.obj
 0
 0.21
@@ -699,6 +735,7 @@ touch_point2.obj
 0
 0.59
 0.24
+0
 0
 0
 left_gripsense.obj
@@ -720,7 +757,9 @@ left_gripsense.obj
 0
 0
 0
+0
 right_gripsense.obj
+0
 0
 0
 0

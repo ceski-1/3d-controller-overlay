@@ -211,8 +211,11 @@ void readInfo(Model &m, std::string path){
                     std::getline(info_file, line);
                     if(isFloat(line))
                         m.meshes[i].touch_height = std::stof(line);
-                    for (int unused = 0; unused < 2; unused++) {
+                    for (int rot = 0; rot < 3; rot++) {
                         std::getline(info_file, line);
+                        if (isFloat(line)) {
+                            m.meshes[i].rotation[rot] = std::stof(line);
+                        }
                     }
                 }
             }
@@ -242,8 +245,9 @@ void writeInfo(Model &m, std::string path){
         info_file << m.meshes[i].stick_max << "\n";
         info_file << m.meshes[i].touch_width << "\n";
         info_file << m.meshes[i].touch_height << "\n";
-        info_file << m.meshes[i].unused1 << "\n";
-        info_file << m.meshes[i].unused2 << "\n";
+        for (int rot = 0; rot < 3; rot++) {
+            info_file << m.meshes[i].rotation[rot] << "\n";
+        }
     }
 }
 
@@ -326,7 +330,12 @@ void drawMesh(Mesh m, glm::mat4 motion, GLuint shader){
     }
     //TOUCH POINTS
     if(m.touch_state){
-        model = glm::translate(model, glm::vec3((m.touch_X * m.touch_width) - m.touch_width * 0.5, 0, (m.touch_Y * m.touch_height) - m.touch_height * 0.5));
+        model = glm::rotate(model, m.rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, m.rotation[1], glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, m.rotation[2], glm::vec3(0.0f, 0.0f, 1.0f));
+        const float x = m.touch_width * (m.touch_X - 0.5f);
+        const float z = m.touch_height * (m.touch_Y - 0.5f);
+        model = glm::translate(model, glm::vec3(x, 0.0f, z));
     }
     
 	shaderUniformVec3(shader, "highlight_color", glm::vec3(m.material.highlight[0], m.material.highlight[1], m.material.highlight[2]));

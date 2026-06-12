@@ -159,8 +159,7 @@ typedef struct mesh_struct {
     float stick_max = 0.0f;
     float touch_width = 0.0f;
     float touch_height = 0.0f;
-    float unused1 = 0.0f;
-    float unused2 = 0.0f;
+    float rotation[3] = {0.0f, 0.0f, 0.0f};
     
     float stick_X = 0.0f;
     float stick_Y = 0.0f;

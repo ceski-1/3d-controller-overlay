@@ -903,6 +903,12 @@ void drawSettingsWindow(){
 					tpoint2_mesh->touch_height = tpoint1_mesh->touch_height;
 				}
 			}
+			if (selected_mesh == (int)mesh_idx::touch_point1 || selected_mesh == (int)mesh_idx::touch_point2) {
+				ImGui::NewLine();
+				ImGui::SliderAngle("Yaw", &current_window->model.meshes[selected_mesh].rotation[1], -90, 90);
+				ImGui::SliderAngle("Pitch", &current_window->model.meshes[selected_mesh].rotation[0], -90, 90);
+				ImGui::SliderAngle("Roll", &current_window->model.meshes[selected_mesh].rotation[2], -90, 90);
+			}
 		}
 		if (ImGui::CollapsingHeader("Gyro")) {
 			if (current_window->sdl_controller != NULL && SDL_GamepadHasSensor(current_window->sdl_controller, SDL_SENSOR_GYRO)) {
