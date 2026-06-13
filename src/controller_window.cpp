@@ -57,6 +57,8 @@ static void clearGripSense(controller_window &w) {
 	w.has_gripsense[1] = false;
 	w.model.meshes[(int)mesh_idx::left_gripsense].visible = false;
 	w.model.meshes[(int)mesh_idx::right_gripsense].visible = false;
+	w.model.meshes[(int)mesh_idx::left_gripsense].skip_depth = false;
+	w.model.meshes[(int)mesh_idx::right_gripsense].skip_depth = false;
 }
 
 static void configureGripSense(controller_window &w) {
@@ -532,9 +534,10 @@ static void updateGripSenseState(controller_window &w) {
 		&w.model.meshes[(int)mesh_idx::right_gripsense],
 	};
 
-	if (w.sdl_controller == NULL) {
+	if (w.sdl_controller == NULL || !w.model.show_gripsense) {
 		for (size_t i = 0; i < SDL_arraysize(gripsense_meshes); i++) {
 			gripsense_meshes[i]->visible = false;
+			gripsense_meshes[i]->skip_depth = false;
 		}
 		return;
 	}
@@ -548,6 +551,7 @@ static void updateGripSenseState(controller_window &w) {
 		if (w.has_gripsense[i]) {
 			gripsense_meshes[i]->visible = SDL_GetGamepadCapSense(w.sdl_controller, gripsenses[i]);
 			gripsense_meshes[i]->highlight_value = gripsense_meshes[i]->visible ? 0.4f : 0.0f;
+			gripsense_meshes[i]->skip_depth = gripsense_meshes[i]->visible;
 		}
 	}
 }

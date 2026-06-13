@@ -129,6 +129,7 @@ typedef struct material_struct {
     float shininess = 32.0f;
     float color[3] = {0.3f, 0.3f, 0.3f};
     float highlight[3] = {0.0f, 1.0f, 0.0f};
+    float alpha = 1.0f;
 }Material; 
 
 typedef struct face_struct{
@@ -174,6 +175,7 @@ typedef struct mesh_struct {
     int ring_highlight_deadzone = 10;
     bool popup = false;
     bool visible = true;
+    bool skip_depth = false;
 
     GLuint vao;
     GLuint vbo;
@@ -193,6 +195,7 @@ typedef struct model_struct {
     bool popup_bumpers = false;
     bool popup_triggers = false;
     bool popup_paddles = false;
+    bool show_gripsense = true;
 }Model;
 
 bool isFloat(std::string myString);

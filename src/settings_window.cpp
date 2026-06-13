@@ -530,15 +530,20 @@ void drawSettingsWindow(){
 				ImGui::SameLine();
 				ImGui::Checkbox("Popup Paddles", &current_window->model.popup_paddles);
 				ImGui::NewLine();
-				ImGui::SliderInt("L-Stick Highlight Deadzone", &current_window->model.meshes[7].ring_highlight_deadzone, 0, 100);
-				ImGui::SliderInt("R-Stick Highlight Deadzone", &current_window->model.meshes[8].ring_highlight_deadzone, 0, 100);
-				ImGui::ColorEdit3("Hightlight Color", current_window->highlight_color);
+				ImGui::Checkbox("Show Grip Sense", &current_window->model.show_gripsense);
+				ImGui::NewLine();
+				ImGui::SliderInt("L-Stick Highlight Deadzone", &current_window->model.meshes[(int)mesh_idx::left_stick_ring].ring_highlight_deadzone, 0, 100);
+				ImGui::SliderInt("R-Stick Highlight Deadzone", &current_window->model.meshes[(int)mesh_idx::right_stick_ring].ring_highlight_deadzone, 0, 100);
+				ImGui::ColorEdit3("Highlight Color", current_window->highlight_color);
 				for (int i = (int)mesh_idx::left_trigger; i < (int)mesh_idx::num_mesh; i++) {
 					if (i != (int)mesh_idx::left_stick_base && i != (int)mesh_idx::right_stick_base) {
 						current_window->model.meshes[i].material.highlight[0] = current_window->highlight_color[0];
 						current_window->model.meshes[i].material.highlight[1] = current_window->highlight_color[1];
 						current_window->model.meshes[i].material.highlight[2] = current_window->highlight_color[2];
 					}
+				}
+				if (ImGui::SliderFloat("Grip Sense Opacity", &current_window->model.meshes[(int)mesh_idx::left_gripsense].material.alpha, 0, 1)) {
+					current_window->model.meshes[(int)mesh_idx::right_gripsense].material.alpha = current_window->model.meshes[(int)mesh_idx::left_gripsense].material.alpha;
 				}
 				ImGui::TreePop();
 			}
@@ -1488,11 +1493,13 @@ void saveTabs(){
 		write_int(std::string("popup bumbers"), getControllerWindow(t.ID)->model.popup_bumpers);
 		write_int(std::string("popup triggers"), getControllerWindow(t.ID)->model.popup_triggers);
 		write_int(std::string("popup paddles"), getControllerWindow(t.ID)->model.popup_paddles);
+		write_int(std::string("show gripsense"), getControllerWindow(t.ID)->model.show_gripsense);
 		write_int(std::string("left stick highlight deadzone"), getControllerWindow(t.ID)->model.meshes[7].ring_highlight_deadzone);
 		write_int(std::string("right stick highlight deadzone"), getControllerWindow(t.ID)->model.meshes[8].ring_highlight_deadzone);
 		write_float(std::string("highlight red"), getControllerWindow(t.ID)->highlight_color[0]);
 		write_float(std::string("highlight green"), getControllerWindow(t.ID)->highlight_color[1]);
 		write_float(std::string("highlight blue"), getControllerWindow(t.ID)->highlight_color[2]);
+		write_float(std::string("gripsense opacity"), getControllerWindow(t.ID)->model.meshes[(int)mesh_idx::left_gripsense].material.alpha);
 		//Materials
 		write_int(std::string("model meshes"), (int)getControllerWindow(t.ID)->model.meshes.size());
 		write_line(std::string("materials"));
@@ -1678,6 +1685,8 @@ void loadTabs(){
 				getControllerWindow(tabs.back().ID)->model.popup_triggers = std::stoi(lines[line_index + 1]);
 			if (line == "popup paddles")
 				getControllerWindow(tabs.back().ID)->model.popup_paddles = std::stoi(lines[line_index + 1]);
+			if (line == "show gripsense")
+				getControllerWindow(tabs.back().ID)->model.show_gripsense= std::stoi(lines[line_index + 1]);
 			if (line == "left stick highlight deadzone")
 				getControllerWindow(tabs.back().ID)->model.meshes[7].ring_highlight_deadzone = std::stoi(lines[line_index + 1]);
 			if (line == "right stick highlight deadzone")
@@ -1695,6 +1704,11 @@ void loadTabs(){
 					getControllerWindow(tabs.back().ID)->model.meshes[i].material.highlight[2] = getControllerWindow(tabs.back().ID)->highlight_color[2];
 				}
 			}	
+			if (line == "gripsense opacity") {
+				const float alpha = std::stof(lines[line_index + 1]);
+				getControllerWindow(tabs.back().ID)->model.meshes[(int)mesh_idx::left_gripsense].material.alpha = alpha;
+				getControllerWindow(tabs.back().ID)->model.meshes[(int)mesh_idx::right_gripsense].material.alpha = alpha;
+			}
 			//Materials
 			if (line == "materials"){
 				for(int i=0; i<(int)getControllerWindow(tabs.back().ID)->model.meshes.size(); i++){

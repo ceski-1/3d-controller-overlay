@@ -23,6 +23,10 @@ void loadModel(Model &m, std::string path){
                 new_mesh.material.specular = 0.05f;
                 new_mesh.material.shininess = 10.0f;
                 break;
+            case mesh_idx::left_gripsense:
+            case mesh_idx::right_gripsense:
+                new_mesh.material.alpha = 0.5f;
+                break;
             default:
                 break;
         }
@@ -340,7 +344,17 @@ void drawMesh(Mesh m, glm::mat4 motion, GLuint shader){
     
 	shaderUniformVec3(shader, "highlight_color", glm::vec3(m.material.highlight[0], m.material.highlight[1], m.material.highlight[2]));
     shaderUniformFloat(shader, "highlight_value", m.highlight_value);
-   
+
+    shaderUniformFloat(shader, "highlight_alpha", m.material.alpha);
+    if (m.material.alpha < 0.999999f) {
+        glEnable(GL_BLEND);
+        glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
+    }
+
+    if (m.skip_depth) {
+        glDisable(GL_DEPTH_TEST);
+    }
+
     shaderUniformMat4(shader, "model", model);
 	glm::mat3 normal = glm::mat3(model);
 	shaderUniformMat3(shader, "normal_model", glm::transpose(glm::inverse(normal)));

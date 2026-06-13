@@ -78,6 +78,7 @@ uniform Material material;
 
 uniform vec3 highlight_color;
 uniform float highlight_value;
+uniform float highlight_alpha;
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir); 
 
@@ -117,7 +118,7 @@ void main()
     }
     //*/
     
-    FragColor = vec4(mix(result, highlight_color, highlight_value), 1.0);
+    FragColor = vec4(mix(result, highlight_color, highlight_value), highlight_alpha);
 }
 
 vec2 CalcTexCoords(Texture t, vec2 inTexCoords){
