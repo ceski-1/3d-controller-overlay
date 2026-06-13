@@ -530,8 +530,6 @@ void drawSettingsWindow(){
 				ImGui::SameLine();
 				ImGui::Checkbox("Popup Paddles", &current_window->model.popup_paddles);
 				ImGui::NewLine();
-				ImGui::Checkbox("Show Grip Sense", &current_window->model.show_gripsense);
-				ImGui::NewLine();
 				ImGui::SliderInt("L-Stick Highlight Deadzone", &current_window->model.meshes[(int)mesh_idx::left_stick_ring].ring_highlight_deadzone, 0, 100);
 				ImGui::SliderInt("R-Stick Highlight Deadzone", &current_window->model.meshes[(int)mesh_idx::right_stick_ring].ring_highlight_deadzone, 0, 100);
 				ImGui::ColorEdit3("Highlight Color", current_window->highlight_color);
@@ -542,6 +540,9 @@ void drawSettingsWindow(){
 						current_window->model.meshes[i].material.highlight[2] = current_window->highlight_color[2];
 					}
 				}
+				ImGui::NewLine();
+				ImGui::Checkbox("Show Capacitive Touch", &current_window->model.show_sticksense);
+				ImGui::Checkbox("Show Grip Sense", &current_window->model.show_gripsense);
 				if (ImGui::SliderFloat("Grip Sense Opacity", &current_window->model.meshes[(int)mesh_idx::left_gripsense].material.alpha, 0, 1)) {
 					current_window->model.meshes[(int)mesh_idx::right_gripsense].material.alpha = current_window->model.meshes[(int)mesh_idx::left_gripsense].material.alpha;
 				}
@@ -1493,6 +1494,7 @@ void saveTabs(){
 		write_int(std::string("popup bumbers"), getControllerWindow(t.ID)->model.popup_bumpers);
 		write_int(std::string("popup triggers"), getControllerWindow(t.ID)->model.popup_triggers);
 		write_int(std::string("popup paddles"), getControllerWindow(t.ID)->model.popup_paddles);
+		write_int(std::string("show sticksense"), getControllerWindow(t.ID)->model.show_sticksense);
 		write_int(std::string("show gripsense"), getControllerWindow(t.ID)->model.show_gripsense);
 		write_int(std::string("left stick highlight deadzone"), getControllerWindow(t.ID)->model.meshes[7].ring_highlight_deadzone);
 		write_int(std::string("right stick highlight deadzone"), getControllerWindow(t.ID)->model.meshes[8].ring_highlight_deadzone);
@@ -1685,6 +1687,8 @@ void loadTabs(){
 				getControllerWindow(tabs.back().ID)->model.popup_triggers = std::stoi(lines[line_index + 1]);
 			if (line == "popup paddles")
 				getControllerWindow(tabs.back().ID)->model.popup_paddles = std::stoi(lines[line_index + 1]);
+			if (line == "show sticksense")
+				getControllerWindow(tabs.back().ID)->model.show_sticksense= std::stoi(lines[line_index + 1]);
 			if (line == "show gripsense")
 				getControllerWindow(tabs.back().ID)->model.show_gripsense= std::stoi(lines[line_index + 1]);
 			if (line == "left stick highlight deadzone")

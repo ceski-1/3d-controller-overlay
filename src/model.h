@@ -195,6 +195,7 @@ typedef struct model_struct {
     bool popup_bumpers = false;
     bool popup_triggers = false;
     bool popup_paddles = false;
+    bool show_sticksense = true;
     bool show_gripsense = true;
 }Model;
 

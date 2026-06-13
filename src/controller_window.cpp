@@ -501,7 +501,7 @@ static void updateStickSenseState(controller_window &w) {
 		&w.model.meshes[(int)mesh_idx::right_stick_cap],
 	};
 
-	if (w.sdl_controller == NULL) {
+	if (w.sdl_controller == NULL || !w.model.show_sticksense) {
 		for (size_t i = 0; i < SDL_arraysize(sticksense_meshes); i++) {
 			sticksense_meshes[i]->released_value = 0.0f;
 		}
