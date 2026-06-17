@@ -92,7 +92,7 @@ std::string GetShaderSource(std::string path){
             shader_source.append(line);
             shader_source.append("\n");
 	    }
-        //SDL_Log(shader_source.c_str());
+        //SDL_Log("%s", shader_source.c_str());
     }
 
     return shader_source;

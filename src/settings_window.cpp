@@ -1281,7 +1281,7 @@ void drawSettingsWindow(){
 								new_mapping.append(",");
 							}
 						}
-						SDL_Log(new_mapping.c_str());
+						SDL_Log("%s", new_mapping.c_str());
 						SDL_AddGamepadMapping(new_mapping.c_str());
 					}
 				}
