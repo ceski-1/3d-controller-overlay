@@ -35,7 +35,7 @@ jobs:
             options: -DCMAKE_INSTALL_PREFIX=/usr
 
           - name: Windows
-            runs-on: windows-2025-vs2026
+            runs-on: windows-latest
             shell: pwsh
             generator: Visual Studio 18 2026
             triplet: x64-windows-static-release
@@ -57,11 +57,11 @@ jobs:
           sudo apt-get install build-essential autoconf autoconf-archive automake libltdl-dev libtool libudev-dev ninja-build libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Restore Cache
         id: cache-vcpkg
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: ${{ github.workspace }}/vcpkg_cache
           key: vcpkg-${{ matrix.config.triplet }}
@@ -112,7 +112,7 @@ jobs:
         run: gh cache delete --repo ${{ github.repository }} ${{ steps.cache-vcpkg.outputs.cache-primary-key }}
 
       - name: Save Cache
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: ${{ github.workspace }}/vcpkg_cache
           key: ${{ steps.cache-vcpkg.outputs.cache-primary-key }}
