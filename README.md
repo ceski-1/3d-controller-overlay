@@ -6,7 +6,7 @@
 
 ## Download
 
-Windows and Linux binaries are provided on the [Releases](https://github.com/ceski-1/3d-controller-overlay/releases/latest) page. To build from source, see [Compiling](#compiling).
+This software is in early development. Windows "artifacts" are available on the [Actions tab](https://github.com/ceski-1/3d-controller-overlay/actions). A GitHub account is required to download them. To build from source, see [Compiling](#compiling).
 
 ## Compiling
 
